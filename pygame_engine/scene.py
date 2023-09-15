@@ -1,16 +1,17 @@
 from typing import List
-import pygame_engine
 
 class Camera:
     def __init__(self):
         self.__x = 0
         self.__y = 0
+        self._index = 0
+        self._len = 2
         
-    def __get__(self):
-        return (self.x, self.y)
+    def __iter__(self):
+        return iter((self.x, self.y))
     
-    def __set__(self, value):
-        self.x, self.y = value
+    def __next__(self):
+        next((self.x, self.y))
     
     @property
     def x(self):
@@ -82,4 +83,4 @@ class Scene:
     @staticmethod
     def load():
         camera = Camera()
-        pygame_engine.set_scene(Scene(camera))
+        return Scene(camera)

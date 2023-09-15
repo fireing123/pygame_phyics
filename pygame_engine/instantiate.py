@@ -1,17 +1,21 @@
 import os
 import json
-import importlib
+import importlib.util
 import inspect
 from typing import Dict
+from pygame_engine import GameObject
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 def import_classes(import_dir):
     class_list = {}
     for file in os.listdir(import_dir):
         if file.endswith(".py") and file != '__init__.py':
             module_name = file[:-3]
+            spec = importlib.util.spec_from_file_location(module_name, import_dir + module_name + ".py")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
             try:
-                module = importlib.import_module(module_name)
-                
                 for name, obj in inspect.getmembers(module):
                     if inspect.isclass(obj):
                         print(f"Imported class: {name} from {module_name}")
@@ -25,4 +29,6 @@ def load(path: str, class_list):
         js : Dict = json.loads(f.read())
         for name in js.keys():
             for json_object in js[name]:
-                class_list[name].instantiate(json_object)
+                args = list(json_object.values())
+                obj = class_list[name](*args)
+                GameObject.instantiate(obj)
