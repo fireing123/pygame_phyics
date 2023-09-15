@@ -11,6 +11,18 @@
             "rotate": 0.0,
             "density": 0.3,
             "friction": 0.5
+        },
+        {
+            "name": "ello",
+            "tag": "tag",
+            "visible": 1,
+            "static": 0,
+            "layer": 3,
+            "position": [500.0, 700.0],
+            "scale": [1000.0, 50.0],
+            "rotate": 0.0,
+            "density": 0.3,
+            "friction": 0.5
         }
     ]
 }
