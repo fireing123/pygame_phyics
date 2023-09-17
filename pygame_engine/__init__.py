@@ -6,7 +6,6 @@ from pygame_engine.object import GameObject
 from pygame_engine.instantiate import import_classes, load
 from pygame_engine.scene import Scene
 
-from pygame_engine.object import MoveObject
 from pygame_engine.object import StaticObject
 from pygame_engine.object import DynamicObject
 

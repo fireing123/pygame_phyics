@@ -1,8 +1,9 @@
 import pygame
 from pygame_engine import DynamicObject
+from pygame_engine import StaticObject
 
 class Rect(DynamicObject):
-    
-    def __init__(self, name, tag, visible, static, layer, position, scale, rotate, density, friction):
-        super().__init__(name, tag, visible, static, layer, position, scale, rotate, density, friction)
-        self.image = pygame.image.load("D:/pygame_engine/example/core.png")
+    pass
+
+class Ground(StaticObject):
+    pass

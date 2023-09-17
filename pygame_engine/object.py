@@ -3,6 +3,9 @@ from typing import Dict
 import pygame_engine
 from Box2D import *
 from Box2D.b2 import *
+import pdb
+PPM = 20
+STEP = 1.0/60
 
 class Component:
     def update(self):
@@ -32,38 +35,53 @@ class GameObject(object):
         self.static = static
 
                 
-class MoveObject(GameObject): 
+class StaticObject(GameObject): 
     def __init__(self, name, tag, visible, static, layer,
-        position, rotate):
-        GameObject.__init__(self, name, tag, visible, static, layer)
-        self.def_body = b2BodyDef()
-        self.def_body.position.Set(*position)
-        self.def_body.angle = rotate
-        self.body : b2Body = pygame_engine.phyics_world.CreateBody(self.def_body)
-
+        position, rotate, scale : tuple | float, shape_type):
+        super().__init__(name, tag, visible, static, layer)
+        match shape_type:
+            case "chain":
+                self.body.CreateChainFixture
+            case "circle":
+                self.shape = b2CircleShape()
+            case "edge":
+                self.body.CreateEdgeFixture
+            case "polygon":
+                self.shape = b2PolygonShape(box=scale)
+        self.body : b2Body = pygame_engine.phyics_world.CreateStaticBody(
+            position=position,
+            angle=rotate,
+            shapes=self.shape
+            )
+    
     def render(self, surface, camera):
-        if not self.visible: return
-        image = pygame.transform.rotate(self.image, self.body.angle)
-        cx, cy = camera
-        rx, ry = image.get_rect(center=(self.body.position.x, self.body.position.y)).topleft
-        self.rect_position = rx - cx, ry - cy
-        surface.blit(image, self.rect_position)
+        for fixture in self.body.fixtures:
+            vertices = [(self.body.transform * v) * PPM for v in fixture.shape.vertices]
+            vertices = [(v[0], surface.get_size()[1] - v[1]) for v in vertices]
+            pygame.draw.polygon(surface, (127, 127, 127, 255), vertices, 1)
 
-class StaticObject(MoveObject):
-    def __init__(self, name, tag, visible, static, layer, position, scale, rotate):
-        super().__init__(name, tag, visible, static, layer, position, rotate)
-        self.shape = b2PolygonShape()
-        self.shape.SetAsBox(*scale)
-        self.body.CreateFixture(shape=self.shape)
 
-class DynamicObject(MoveObject):
-    def __init__(self, name, tag, visible, static, layer, position, scale, rotate,
+class DynamicObject(GameObject):
+    def __init__(self, name, tag, visible, static, layer,
+        position, rotate, scale : tuple | float, shape_type,
         density, friction):
-        super().__init__(name, tag, visible, static, layer, position, rotate)
-        self.shape = b2PolygonShape()
-        self.shape.SetAsBox(*scale)
-        self.def_fixture = b2FixtureDef()
-        self.def_fixture.shape = self.shape
-        self.def_fixture.density = density
-        self.def_fixture.friction = friction
-        self.body.CreateFixture(self.def_fixture)
+        super().__init__(name, tag, visible, static, layer)
+        self.body : b2Body = pygame_engine.phyics_world.CreateDynamicBody(
+            position=position,
+            angle=rotate
+        )
+        match shape_type:
+            case "chain":
+                self.body.CreateChainFixture
+            case "circle":
+                self.shape = b2CircleShape()
+            case "edge":
+                self.body.CreateEdgeFixture
+            case "polygon":
+                self.fixture = self.body.CreatePolygonFixture(box=scale, density=density, friction=friction)
+    
+    def render(self, surface, camera):
+        for fixture in self.body.fixtures:
+            vertices = [(self.body.transform * v) * PPM for v in fixture.shape.vertices]
+            vertices = [(v[0], surface.get_size()[1] - v[1]) for v in vertices]
+            pygame.draw.polygon(surface, (127, 127, 127, 255), vertices, 1)
