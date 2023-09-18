@@ -1,12 +1,17 @@
-import pygame_engine
+from pygame_engine.game import Game
+from pygame_engine.game import world
 
-pygame_engine.init((1000, 800), "example", "D:/pygame_engine/example/objects/")
+Game.init((1000, 800), "MyGame")
 
-@pygame_engine.world("D:/pygame_engine/example/example.json")
-def start():
-    pygame_engine.scene.brightening()
-    def bg():
-        pygame_engine.screen.fill((255,255,255))
-    pygame_engine.game_loop(funcs=[bg])
+Game.import_objects("example/objects/")
+
+@world("example/example.json")
+def main():
     
-start()
+    def draw():
+        Game.screen.fill((60, 60, 60, 255))
+    
+    Game.loop([], [draw])
+
+
+main()

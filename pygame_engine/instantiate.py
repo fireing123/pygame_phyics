@@ -3,7 +3,6 @@ import json
 import importlib.util
 import inspect
 from typing import Dict
-from pygame_engine import GameObject
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -25,6 +24,7 @@ def import_classes(import_dir):
     return class_list
 
 def load(path: str, class_list):
+    from pygame_engine.object import GameObject
     with open(path, 'r') as f:
         js : Dict = json.loads(f.read())
         for name in js.keys():

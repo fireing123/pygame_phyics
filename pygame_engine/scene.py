@@ -39,8 +39,8 @@ class Camera:
 
 class Scene:
     
-    def __init__(self, camera):
-        self.camera = camera
+    def __init__(self):
+        self.camera = Camera()
         self.layers = [[],[],[],[],[],[],[],[]]
     
     def layer_loop(self, method, *args):
@@ -73,14 +73,14 @@ class Scene:
         for layer in self.layers:
             for _ in range(len(layer)):
                 layer[0].delete()
-         
+        
+    def __del__(self):
+        self.clear()
+        del self.layers
+        del self.camera
+    
     def darkening(self):
         pass
     
     def brightening(self):
         pass
-    
-    @staticmethod
-    def load():
-        camera = Camera()
-        return Scene(camera)
