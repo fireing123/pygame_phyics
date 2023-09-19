@@ -6,7 +6,10 @@ class Camera:
         self.__y = 0
         self._index = 0
         self._len = 2
-        
+     
+    def __getitem__(self, index):
+        return (self.x, self.y)[index]
+
     def __iter__(self):
         return iter((self.x, self.y))
     

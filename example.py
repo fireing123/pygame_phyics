@@ -7,7 +7,7 @@ Game.import_objects("example/objects/")
 
 @world("example/example.json")
 def main():
-    
+
     def draw():
         Game.screen.fill((60, 60, 60, 255))
     

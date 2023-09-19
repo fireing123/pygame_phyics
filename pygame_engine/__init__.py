@@ -1,3 +1,4 @@
+PPM =20
 from pygame_engine.game import Game
 from pygame_engine.object import GameObject
 

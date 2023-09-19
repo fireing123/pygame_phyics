@@ -3,13 +3,32 @@
         {
             "name": "hello",
             "tag": "tag",
-            "visible": 1,
-            "static": 0,
+            "visible": true,
             "layer": 3,
             "position": [20.0, 45.0],
-            "rotate": 45.0,
-            "scale": [2.0, 1.0],
+            "rotate": 1,
+            "scale": [[-1.5, -0.5],
+            [1.5, -0.5],
+            [1.5, 0.0],
+            [0.0, 0.9],
+            [-1.15, 0.9],
+            [-1.5, 0.2]],
             "shapeType" : "polygon",
+            "collide_visible" : true,
+            "density" : 1,
+            "friction" : 0.3
+
+        },
+        {
+            "name": "hello",
+            "tag": "tag",
+            "visible": true,
+            "layer": 3,
+            "position": [30.0, 45.0],
+            "rotate": 0,
+            "scale": 0.5,
+            "shapeType" : "circle",
+            "collide_visible" : true,
             "density" : 1,
             "friction" : 0.3
 
@@ -19,13 +38,16 @@
         {
             "name": "ello",
             "tag": "ta",
-            "visible": 1,
-            "static": 0,
+            "visible": true,
             "layer": 3,
             "position": [0.0, 0.0],
             "rotate": 0.0,
-            "scale": [50.0, 1.0],
-            "shapeType" : "polygon"
+            "scale": [[100.0, 1.0],
+            [0.0, 0.0],
+            [100.0, 0.0],
+            [0.0, 1.0]],
+            "shapeType" : "polygon",
+            "collide_visible" : false
 
         }
     ]
