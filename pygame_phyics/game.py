@@ -3,9 +3,9 @@ from pygame import display
 
 from Box2D import b2World
 
-from pygame_engine.scene import Scene
-from pygame_engine.instantiate import import_classes
-from pygame_engine.instantiate import load as instantiate_load
+from pygame_phyics.scene import Scene
+from pygame_phyics.instantiate import import_classes
+from pygame_phyics.instantiate import load as instantiate_load
 
 def world(world_path):
     def real_world(func):

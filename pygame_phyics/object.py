@@ -1,8 +1,8 @@
 import math
 import pygame
 from typing import Dict
-from pygame_engine import Game
-from pygame_engine import PPM
+from pygame_phyics import Game
+from pygame_phyics import PPM
 from Box2D import *
 from Box2D.b2 import *
 

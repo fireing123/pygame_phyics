@@ -24,7 +24,7 @@ def import_classes(import_dir):
     return class_list
 
 def load(path: str, class_list):
-    from pygame_engine.object import GameObject
+    from pygame_phyics.object import GameObject
     with open(path, 'r') as f:
         js : Dict = json.loads(f.read())
         for name in js.keys():

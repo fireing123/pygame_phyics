@@ -1,5 +1,5 @@
-from pygame_engine.game import Game
-from pygame_engine.game import world
+from pygame_phyics.game import Game
+from pygame_phyics.game import world
 
 Game.init((1000, 800), "MyGame")
 
