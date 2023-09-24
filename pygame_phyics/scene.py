@@ -76,7 +76,15 @@ class Scene:
         for layer in self.layers:
             for _ in range(len(layer)):
                 layer[0].delete()
-        
+    
+    def get_objects(self, obj_name):
+        objs = []
+        for layer in self.layers:
+            for i in range(len(layer)):
+                if layer[i].name == obj_name:
+                    objs.append(layer[i])
+        return objs
+    
     def __del__(self):
         self.clear()
         del self.layers

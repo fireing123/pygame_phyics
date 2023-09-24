@@ -43,6 +43,22 @@ class ImageObject(Component):
         self.rect.center = self.rect.center[0] - camera.x, self.rect.center[1] - camera.y
         surface.blit(self.image, self.rect)
 
+class Joint:
+    joints = []
+    
+    def CreateJoint(self, frequency_hz, damping_ratio, body, localAnchor_a, localAnchor_b):
+        joint = b2DistanceJointDef(
+            frequencyHz=frequency_hz,
+            dampingRatio=damping_ratio,
+            bodyA=self.body,
+            bodyB=body,
+            localAnchorA=localAnchor_a,
+            localAnchorB=localAnchor_b
+        )
+        created_joint = Game.phyics_world.CreateJoint(joint)
+        Joint.joints.append(created_joint)
+        return created_joint
+
 class object(Component):
     
     def __init__(self, name, layer, tag):
@@ -76,19 +92,49 @@ def polygon_render(polygon, body, surface, camera):
     vertices = [(v[0] - camera[0], v[1] - camera[1]) for v in vertices]
     pygame.draw.polygon(surface, (127, 127, 127, 255), vertices, 1)
 b2PolygonShape.render = polygon_render
-                
-class StaticObject(GameObject): 
+    
+class Phyics(GameObject, Joint):
+
+    def delete(self):
+        Game.phyics_world.DestroyBody(self.body)
+        GameObject.delete(self)
+    
+    @property
+    def position(self):
+        return self.body.transform.position
+    
+    @position.getter
+    def position(self):
+        return self.body.transform.position
+    
+    @position.setter
+    def position(self, value):
+        self.body.transform.position
+    
+    @property
+    def angle(self):
+        return self.body.angle
+    
+    @angle.getter
+    def angle(self):
+        return self.body.angle * 45
+    
+    @angle.setter
+    def angle(self, value):
+        self.body.angle / 45
+          
+class StaticObject(Phyics): 
     def __init__(self, name, tag, visible, layer,
         position, rotate, scale : tuple | float, shape_type, collid_visible):
         super().__init__(name, tag, visible, layer)
         self.collid_visible = collid_visible
         match shape_type:
             case "chain":
-                pass
+                self.shape = b2ChainShape()
             case "circle":
                 self.shape = b2CircleShape()
             case "edge":
-                pass
+                self.shape = b2EdgeShape(vertices=scale)
             case "polygon":
                 self.shape = b2PolygonShape(vertices=scale)
         self.body : b2Body = Game.phyics_world.CreateStaticBody(
@@ -97,16 +143,12 @@ class StaticObject(GameObject):
             shapes=self.shape
             )
     
-    @property
-    def position(self):
-        return self.body.position
-    
     def render(self, surface, camera):
         if self.collid_visible:
             for fixture in self.body.fixtures:
                 fixture.shape.render(self.body, surface, camera)
 
-class DynamicObject(GameObject):
+class DynamicObject(Phyics):
     def __init__(self, name, tag, visible, layer,
         position, rotate, scale : tuple | float, shape_type, collid_visible,
         density, friction):
@@ -125,22 +167,6 @@ class DynamicObject(GameObject):
                 pass
             case "polygon":
                 self.fixture = self.body.CreatePolygonFixture(vertices=scale, density=density, friction=friction)
-    
-    @property
-    def position(self):
-        return self.body.transform.position
-    
-    @position.getter
-    def position(self):
-        return self.body.transform.position
-    
-    @property
-    def angle(self):
-        return self.body.angle
-    
-    @angle.getter
-    def angle(self):
-        return self.body.angle * 45
     
     def render(self, surface, camera):
         if self.collid_visible:
