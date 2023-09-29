@@ -1,10 +1,11 @@
 import math
 import pygame
 from typing import Dict
+from Box2D.b2 import *
+from Box2D import *
 from pygame_phyics import Game
 from pygame_phyics import PPM
-from Box2D import *
-from Box2D.b2 import *
+from pygame_phyics.error import ImmutableAttributeError
 
 def rotate_point_around_origin(x, y, angle_degrees):
     angle_radians = math.radians(angle_degrees)
@@ -19,6 +20,13 @@ def rotate_point_b_around_a(a, b, angle_degrees):
     return rotated_b
 
 class Component:
+    
+    def on_mouse_enter(self, pos):
+        pass
+    def on_mouse_stay(self, pos):
+        pass
+    def on_mouse_exit(self, pos):
+        pass
     def update(self):
         pass
     def render(self, surface, camera):
@@ -46,18 +54,17 @@ class ImageObject(Component):
 class Joint:
     joints = []
     
-    def CreateJoint(self, frequency_hz, damping_ratio, body, localAnchor_a, localAnchor_b):
-        joint = b2DistanceJointDef(
+    def CreateJoint(self, frequency_hz, damping_ratio, body):
+        joint = Game.phyics_world.CreateDistanceJoint(
             frequencyHz=frequency_hz,
             dampingRatio=damping_ratio,
             bodyA=self.body,
-            bodyB=body,
-            localAnchorA=localAnchor_a,
-            localAnchorB=localAnchor_b
+            bodyB=body.body,
+            anchorA=self.position,
+            anchorB=body.body.transform.position
         )
-        created_joint = Game.phyics_world.CreateJoint(joint)
-        Joint.joints.append(created_joint)
-        return created_joint
+        Joint.joints.append(joint)
+        return joint
 
 class object(Component):
     
@@ -78,6 +85,8 @@ class GameObject(object):
     def __init__(self, name: str, tag, visible, layer):
         super().__init__(name, layer, tag)
         self.visible = visible
+        self.rect = None
+        self.collide = 'out'
     
 def circle_render(circle, body, surface, camera):
     position = body.transform * circle.pos * PPM
@@ -172,4 +181,27 @@ class DynamicObject(Phyics):
         if self.collid_visible:
             for fixture in self.body.fixtures:
                 fixture.shape.render(self.body, surface, camera)
+
+class Text(GameObject):
+    def __init__(self, name: str, tag, visible, layer, position, size, color, Font):
+        super().__init__(name, tag, visible, layer)
+        self.font = pygame.font.Font(Font, size)
+        self.position = position
+        self.color = color
+        self.text = ""
         
+    @property
+    def image(self):
+        return self.__image
+    
+    @image.setter
+    def image(self, _):
+        raise ImmutableAttributeError(__name__, 'image')
+    
+    def render(self, surface, camera):
+        self.__image = self.font.render(self.text, True, self.color)
+        x = self.position[0]
+        y = self.position[1]
+        x -= camera[0]
+        y -= camera[1]
+        surface.blit(self.__image, (x, y))

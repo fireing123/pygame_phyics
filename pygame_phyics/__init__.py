@@ -3,7 +3,11 @@ __version__ = "0.1"
 
 PPM =20
 
+from pygame import *
+
 from pygame_phyics.game import Game
+
+
 from pygame_phyics.object import GameObject
 
 from pygame_phyics.object import StaticObject
