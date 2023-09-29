@@ -3,10 +3,10 @@ __version__ = "0.1"
 
 PPM =20
 
-from pygame import *
-
 from pygame_phyics.game import Game
 
+import pygame_phyics.mouse as mouse
+import pygame_phyics.object as object
 
 from pygame_phyics.object import GameObject
 

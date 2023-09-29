@@ -11,11 +11,13 @@ Game.import_objects("example/objects/")
 def main():
     rect : DynamicObject= Game.scene.get_objects("hello")[0]
     circle = Game.scene.get_objects("llo")[0]
+    text = Game.scene.get_objects("eello")[0]
+    text.text = "hello"
     rect.CreateJoint(4.0, 0.5, circle)
     def draw():
         Game.screen.fill((60, 60, 60, 255))
     
-    Game.loop([], [draw, mouse_event])
+    Game.loop([], [draw])
 
 
 main()

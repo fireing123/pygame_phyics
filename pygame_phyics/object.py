@@ -20,7 +20,6 @@ def rotate_point_b_around_a(a, b, angle_degrees):
     return rotated_b
 
 class Component:
-    
     def on_mouse_enter(self, pos):
         pass
     def on_mouse_stay(self, pos):
@@ -205,3 +204,9 @@ class Text(GameObject):
         x -= camera[0]
         y -= camera[1]
         surface.blit(self.__image, (x, y))
+
+class Button(GameObject):
+    pass
+
+class InputField(GameObject):
+    pass

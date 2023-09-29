@@ -1,9 +1,7 @@
-import pygame
 from pygame.mouse import *
-from pygame_phyics import Game
 
-def mouse_event():
-    for layer in Game.scene.layers[::-1]:
+def mouse_event(layers):
+    for layer in layers[::-1]:
         for obj in layer:
             if obj.rect != None:
                 if obj.rect.collidepoint(get_pos()):

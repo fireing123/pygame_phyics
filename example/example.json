@@ -50,5 +50,17 @@
             "collide_visible" : false
 
         }
+    ],
+    "Text": [
+        {
+            "name": "eello",
+            "tag": "ta",
+            "visible": true,
+            "layer": 3,
+            "position": [0.0, 0.0],
+            "size": 50,
+            "color":[255, 255, 255],
+            "Font":null
+        }
     ]
 }

@@ -2,10 +2,11 @@ import pygame
 from pygame import display
 
 from Box2D import b2World
-
 from pygame_phyics.scene import Scene
-from pygame_phyics.instantiate import import_classes
+from pygame_phyics.mouse import mouse_event
+from pygame_phyics.instantiate import import_module, import_classes
 from pygame_phyics.instantiate import load as instantiate_load
+
 
 def world(world_path):
     def real_world(func):
@@ -36,10 +37,11 @@ class Game:
         cls.screen = display.set_mode(size)
         cls.phyics_world = b2World()
         cls.scene = Scene()
+        cls.objs.update(import_classes('object', 'pygame_phyics/'))
     
     @classmethod
     def import_objects(cls, obj_dir):
-        cls.objs.update(import_classes(obj_dir))
+        cls.objs.update(import_module(obj_dir))
         
     @classmethod
     def loop(cls, events=[], funcs=[]):
@@ -47,7 +49,13 @@ class Game:
             cls.clock.tick(60)
             for func in funcs:
                 func()
-
+            
+            #collider event
+            
+            mouse_event(cls.scene.layers)
+            
+            cls.scene.update()
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     quit()
@@ -59,6 +67,5 @@ class Game:
                 cls.ve_iters,
                 cls.pos_iters
                 )
-            cls.scene.update()
             cls.scene.render(cls.screen)
             pygame.display.update()
