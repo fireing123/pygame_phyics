@@ -1,9 +1,8 @@
 import math
 import pygame
-from typing import Dict
 from Box2D.b2 import *
 from Box2D import *
-from pygame_phyics import Game
+from pygame_phyics.manger import Manger
 from pygame_phyics import PPM
 from pygame_phyics.error import ImmutableAttributeError
 
@@ -53,8 +52,8 @@ class ImageObject(Component):
 class Joint:
     joints = []
     
-    def CreateJoint(self, frequency_hz, damping_ratio, body):
-        joint = Game.phyics_world.CreateDistanceJoint(
+    def create_joint(self, frequency_hz, damping_ratio, body):
+        joint = Manger.world.CreateDistanceJoint(
             frequencyHz=frequency_hz,
             dampingRatio=damping_ratio,
             bodyA=self.body,
@@ -73,11 +72,11 @@ class object(Component):
         self.layer = layer
 
     def delete(self): 
-        Game.scene.remove(self)
+        Manger.scene.remove(self)
 
     @staticmethod
     def instantiate(object):
-        Game.scene.add(object)
+        Manger.scene.add(object)
 
 class GameObject(object):
     
@@ -104,7 +103,7 @@ b2PolygonShape.render = polygon_render
 class Phyics(GameObject, Joint):
 
     def delete(self):
-        Game.phyics_world.DestroyBody(self.body)
+        Manger.world.DestroyBody(self.body)
         GameObject.delete(self)
     
     @property
@@ -145,7 +144,7 @@ class StaticObject(Phyics):
                 self.shape = b2EdgeShape(vertices=scale)
             case "polygon":
                 self.shape = b2PolygonShape(vertices=scale)
-        self.body : b2Body = Game.phyics_world.CreateStaticBody(
+        self.body : b2Body = Manger.world.CreateStaticBody(
             position=position,
             angle=rotate,
             shapes=self.shape
@@ -162,7 +161,7 @@ class DynamicObject(Phyics):
         density, friction):
         super().__init__(name, tag, visible, layer)
         self.collid_visible = collid_visible
-        self.body : b2Body = Game.phyics_world.CreateDynamicBody(
+        self.body : b2Body = Manger.world.CreateDynamicBody(
             position=position,
             angle=rotate
         )
