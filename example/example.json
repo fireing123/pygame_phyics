@@ -58,9 +58,35 @@
             "visible": true,
             "layer": 3,
             "position": [0.0, 0.0],
+            "angle": 0,
             "size": 50,
             "color":[255, 255, 255],
             "Font":null
+        }
+    ],
+    "Button": [
+        {
+            "name": "eeldlo",
+            "tag": "ta",
+            "visible": true,
+            "layer": 3,
+            "position": [20.0, 20.0],
+            "angle": 0,
+            "default": "./example/core.png",
+            "clicked": "./example/bomb-skill.png"
+        }
+    ],
+    "InputField": [
+        {
+            "name": "eeldlo",
+            "tag": "ta",
+            "visible": true,
+            "layer": 3,
+            "position": [20.0, 25.0],
+            "angle": 0,
+            "scale": [50, 50],
+            "color": [255, 255, 255],
+            "font": null
         }
     ]
 }

@@ -39,3 +39,10 @@ class Input:
         if cls.mouse_click[bt] == 1:
             return True
         return False
+    
+    @classmethod
+    def input_keys(cls):
+        keys = ""
+        for k, v in cls.key_board.items():
+            keys += k
+        return keys

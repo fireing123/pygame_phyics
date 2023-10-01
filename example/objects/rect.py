@@ -16,7 +16,6 @@ class Rect(DynamicObject):
 
     def update(self):
         self.image.update()
-        self.rect = self.image.rect
 
     def render(self, surface, camera):
         super().render(surface, camera)

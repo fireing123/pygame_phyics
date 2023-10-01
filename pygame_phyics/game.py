@@ -69,8 +69,6 @@ class Game:
             
             #collider event
             
-            mouse_event()
-            
             mouse_pressed = mouse.get_pressed()
             
             for i in range(3):
@@ -81,11 +79,13 @@ class Game:
                     else:
                         Input.mouse_click[i] = 3
                 else:
-                    if mouse_click <= 2:
-                        Input.mouse_click[i] = 0
-                    else:
+                    if mouse_click >= 2:
                         Input.mouse_click[i] = 1
+                    else:
+                        Input.mouse_click[i] = 0
                         
+            mouse_event()
+            
             Manger.scene.update()
             
             for key, value in Input.key_board.items():
@@ -98,9 +98,9 @@ class Game:
                 if event.type == pygame.QUIT:
                     quit()
                 elif event.type == pygame.KEYDOWN:
-                    Input.key_board[event.key] = 2
+                    Input.key_board[event.unicode] = 2
                 elif event.type == pygame.KEYUP:
-                    Input.key_board[event.key] = 1
+                    Input.key_board[event.unicode] = 1
                 for event_func in events:
                     event_func(event)
 

@@ -5,6 +5,8 @@ from Box2D import *
 from pygame_phyics.manger import Manger
 from pygame_phyics import PPM
 from pygame_phyics.error import ImmutableAttributeError
+from pygame_phyics.input import Input
+from pygame_phyics.event import Event
 
 def rotate_point_around_origin(x, y, angle_degrees):
     angle_radians = math.radians(angle_degrees)
@@ -31,7 +33,7 @@ class Component:
         pass
     
 class ImageObject(Component):
-    def __init__(self, object, image, position, angle):
+    def __init__(self, object, image, position=(0, 0), angle=0):
         self.object = object
         self.og_image = pygame.image.load(image)
         self.image = self.og_image
@@ -40,9 +42,10 @@ class ImageObject(Component):
         self.angle = angle
     
     def update(self):
-        position = rotate_point_b_around_a(self.object.position * PPM, self.object.position * PPM + self.position, self.object.angle)
+        position = rotate_point_b_around_a([obj_pos * PPM for obj_pos in self.object.position], [obj * PPM + pos for obj, pos in zip(self.object.position, self.position)], self.object.angle)
         self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle)
         self.rect = self.image.get_rect(center=position)
+        self.object.rect = self.rect
 
     def render(self, surface, camera):
         self.rect.centery = surface.get_size()[1] - self.rect.centery
@@ -180,11 +183,16 @@ class DynamicObject(Phyics):
             for fixture in self.body.fixtures:
                 fixture.shape.render(self.body, surface, camera)
 
-class Text(GameObject):
-    def __init__(self, name: str, tag, visible, layer, position, size, color, Font):
+class UI(GameObject):
+    def __init__(self, name: str, tag, visible, layer, position, angle):
         super().__init__(name, tag, visible, layer)
-        self.font = pygame.font.Font(Font, size)
         self.position = position
+        self.angle = angle
+
+class Text(UI):
+    def __init__(self, name: str, tag, visible, layer, position, angle, size, color, Font):
+        super().__init__(name, tag, visible, layer, position, angle)
+        self.font = pygame.font.Font(Font, size)
         self.color = color
         self.text = ""
         
@@ -204,8 +212,53 @@ class Text(GameObject):
         y -= camera[1]
         surface.blit(self.__image, (x, y))
 
-class Button(GameObject):
-    pass
-
-class InputField(GameObject):
-    pass
+class Button(UI):
+    def __init__(self, name: str, tag, visible, layer, position, angle, default, clicked):
+        super().__init__(name, tag, visible, layer, position, angle)
+        self.default = ImageObject(self, default)
+        self.clicked = ImageObject(self, clicked)
+        self.image = self.default
+        self.is_click = Event()
+    
+    def on_mouse_stay(self, pos):
+        if Input.get_mouse_down(0):
+            self.is_click.invoke() 
+            self.image = self.clicked
+        elif Input.get_mouse_up(0):
+            self.image = self.default
+    
+    def update(self):
+        self.image.update()
+        
+    def render(self, surface, camera):
+        self.image.render(surface, camera)
+    
+   
+class InputField(UI):
+    def __init__(self, name: str, tag, visible, layer, position, angle, scale, color, font):
+        super().__init__(name, tag, visible, layer, position, angle)
+        self.image = ImageObject(self, "./example/core.png")
+        self.field = Text(name+"field", tag, visible, layer, position, angle, scale[1], color, font)
+        self.focused = False
+        self.stay = False
+        
+    def on_mouse_enter(self, pos):
+        self.stay = True
+    
+    def on_mouse_stay(self, pos):
+        if Input.get_mouse_down(0):
+            self.focused = True
+    
+    def on_mouse_exit(self, pos):
+        self.stay = False
+    
+    def update(self):
+        self.image.update()
+        if not self.stay and Input.get_mouse_down(0):
+            self.focused = False
+        if self.focused:
+            self.field.text += Input.input_keys()
+    
+    def render(self, surface, camera):
+        self.image.render(surface, camera)
+        self.field.render(surface, camera)
