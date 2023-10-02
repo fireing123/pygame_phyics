@@ -61,12 +61,13 @@
             "angle": 0,
             "size": 50,
             "color":[255, 255, 255],
-            "Font":null
+            "Font":"./example/Galmuri11.ttf",
+            "interval" : 10
         }
     ],
     "Button": [
         {
-            "name": "eeldlo",
+            "name": "eaeldlo",
             "tag": "ta",
             "visible": true,
             "layer": 3,
@@ -86,7 +87,9 @@
             "angle": 0,
             "scale": [50, 50],
             "color": [255, 255, 255],
-            "font": null
+            "font": "./example/Galmuri11.ttf",
+            "interval":-10,
+            "rect": [320, 40]
         }
     ]
 }

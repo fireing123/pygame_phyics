@@ -1,7 +1,7 @@
 import math
 import pygame
-from Box2D.b2 import *
-from Box2D import *
+import Box2D.b2 as b2
+import Box2D
 from pygame_phyics.manger import Manger
 from pygame_phyics import PPM
 from pygame_phyics.error import ImmutableAttributeError
@@ -94,14 +94,14 @@ def circle_render(circle, body, surface, camera):
     position = (position[0] - camera[0], surface.get_size()[1] - position[1] - camera[1])
     pygame.draw.circle(surface, (127, 127, 127, 255), [int(
         x) for x in position], int(circle.radius * PPM), 1)
-b2CircleShape.render = circle_render
+Box2D.b2CircleShape.render = circle_render
 
 def polygon_render(polygon, body, surface, camera):
     vertices = [(body.transform * v) * PPM for v in polygon.vertices]
     vertices = [(v[0], surface.get_size()[1] - v[1]) for v in vertices]
     vertices = [(v[0] - camera[0], v[1] - camera[1]) for v in vertices]
     pygame.draw.polygon(surface, (127, 127, 127, 255), vertices, 1)
-b2PolygonShape.render = polygon_render
+Box2D.b2PolygonShape.render = polygon_render
     
 class Phyics(GameObject, Joint):
 
@@ -131,7 +131,7 @@ class Phyics(GameObject, Joint):
     
     @angle.setter
     def angle(self, value):
-        self.body.angle / 45
+        self.body.angle = value / 45
           
 class StaticObject(Phyics): 
     def __init__(self, name, tag, visible, layer,
@@ -140,14 +140,14 @@ class StaticObject(Phyics):
         self.collid_visible = collid_visible
         match shape_type:
             case "chain":
-                self.shape = b2ChainShape()
+                self.shape = Box2D.b2ChainShape()
             case "circle":
-                self.shape = b2CircleShape()
+                self.shape = Box2D.b2CircleShape()
             case "edge":
-                self.shape = b2EdgeShape(vertices=scale)
+                self.shape = Box2D.b2EdgeShape(vertices=scale)
             case "polygon":
-                self.shape = b2PolygonShape(vertices=scale)
-        self.body : b2Body = Manger.world.CreateStaticBody(
+                self.shape = Box2D.b2PolygonShape(vertices=scale)
+        self.body : Box2D.b2Body = Manger.world.CreateStaticBody(
             position=position,
             angle=rotate,
             shapes=self.shape
@@ -164,7 +164,7 @@ class DynamicObject(Phyics):
         density, friction):
         super().__init__(name, tag, visible, layer)
         self.collid_visible = collid_visible
-        self.body : b2Body = Manger.world.CreateDynamicBody(
+        self.body : Box2D.b2Body = Manger.world.CreateDynamicBody(
             position=position,
             angle=rotate
         )
@@ -190,27 +190,26 @@ class UI(GameObject):
         self.angle = angle
 
 class Text(UI):
-    def __init__(self, name: str, tag, visible, layer, position, angle, size, color, Font):
+    def __init__(self, name: str, tag, visible, layer, position, angle, size, color, Font, interval):
         super().__init__(name, tag, visible, layer, position, angle)
         self.font = pygame.font.Font(Font, size)
+        self.size = size
+        self.interval = interval
         self.color = color
         self.text = ""
-        
-    @property
-    def image(self):
-        return self.__image
     
-    @image.setter
-    def image(self, _):
-        raise ImmutableAttributeError(__name__, 'image')
-    
-    def render(self, surface, camera):
-        self.__image = self.font.render(self.text, True, self.color)
-        x = self.position[0]
-        y = self.position[1]
+    def render(self, surface : pygame.Surface, camera):
+        texts = self.text.split('\n')
+        self.images = [self.font.render(text, True, self.color) for text in texts]
+        x = self.position[0] * PPM
+        y = self.position[1] * PPM
         x -= camera[0]
         y -= camera[1]
-        surface.blit(self.__image, (x, y))
+        self.positions = []
+        for i in texts:
+            self.positions.append((x, y))
+            y += self.size + self.interval
+        surface.blits(list(zip(self.images, self.positions)))
 
 class Button(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, default, clicked):
@@ -235,12 +234,20 @@ class Button(UI):
     
    
 class InputField(UI):
-    def __init__(self, name: str, tag, visible, layer, position, angle, scale, color, font):
+    def __init__(self, name: str, tag, visible, layer, position, angle, scale, color, font, interval, rect):
         super().__init__(name, tag, visible, layer, position, angle)
-        self.image = ImageObject(self, "./example/core.png")
-        self.field = Text(name+"field", tag, visible, layer, position, angle, scale[1], color, font)
+        self.image = pygame.Surface(rect)
+        self.image.fill((0, 0, 0, 0))
+        self.rect = self.image.get_rect(topleft=[pos * PPM for pos in position])
+        self.field = Text(name+"field", tag, visible, layer, position, angle, scale[1], color, font, interval)
+        self.text = ""
         self.focused = False
+        self.editing_pos = 0
+        self.text_edit = False
+        self.text_editing = ""
+        self.text_editing_pos = 0
         self.stay = False
+        self.input_event = Event()
         
     def on_mouse_enter(self, pos):
         self.stay = True
@@ -253,12 +260,41 @@ class InputField(UI):
         self.stay = False
     
     def update(self):
-        self.image.update()
         if not self.stay and Input.get_mouse_down(0):
             self.focused = False
-        if self.focused:
-            self.field.text += Input.input_keys()
     
+    def inputfield_event(self, event):
+        if self.focused:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    if len(self.text) > 0 and self.editing_pos > 0:
+                        self.text = self.text[:self.editing_pos-1] + self.text[self.editing_pos:]
+                        self.editing_pos = max(0, self.editing_pos - 1)
+                elif event.key == pygame.K_DELETE:
+                    self.text = self.text[:self.editing_pos] + self.text[self.editing_pos+1:]
+                elif event.key == pygame.K_LEFT:
+                    self.editing_pos = max(0, self.editing_pos - 1)
+                elif event.key == pygame.K_RIGHT:
+                    self.editing_pos = min(
+                        len(self.text), self.editing_pos + 1
+                    )
+                elif event.key in [pygame.K_KP_ENTER, 13]:
+                    self.text += '\n'
+                    self.editing_pos += 1
+            elif event.type == pygame.TEXTEDITING:
+                self.text_edit = True
+                self.text_editing = event.text
+                self.text_editing_pos = event.start
+            elif event.type == pygame.TEXTINPUT:
+                self.text_edit = False
+                self.text_editing = ""
+                self.text = self.text[:self.editing_pos] + event.text + self.text[self.editing_pos:]
+                self.editing_pos += len(event.text)
+
+            self.field.text = self.text + self.text_editing
+            edit_text_pos = self.editing_pos + len(self.text_editing)
+            self.field.text = self.field.text[:edit_text_pos] + "|" + self.field.text[edit_text_pos:]
+
     def render(self, surface, camera):
-        self.image.render(surface, camera)
+        surface.blit(self.image, self.rect)
         self.field.render(surface, camera)

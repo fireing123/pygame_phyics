@@ -12,12 +12,13 @@ def main():
     rect : DynamicObject= Manger.scene.get_objects("hello")[0]
     circle = Manger.scene.get_objects("ello")[0]
     text = Manger.scene.get_objects("eello")[0]
-    text.text = "hello"
+    inputfield = Manger.scene.get_objects("eeldlo")[0]
+    text.text = 'hello\nworld!\n 한국어'
     rect.create_joint(4.0, 0.5, circle)
     def draw():
         Manger.screen.fill((60, 60, 60, 255))
     
-    Game.loop([], [draw])
+    Game.loop([inputfield.inputfield_event], [draw])
 
 
 main()

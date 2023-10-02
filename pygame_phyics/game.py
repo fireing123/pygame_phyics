@@ -59,6 +59,8 @@ class Game:
     @classmethod
     def loop(cls, events=[], funcs=[]):
         
+        pygame.key.start_text_input()
+        
         while cls.is_running:
             
             cls.clock.tick(60)
@@ -98,9 +100,9 @@ class Game:
                 if event.type == pygame.QUIT:
                     quit()
                 elif event.type == pygame.KEYDOWN:
-                    Input.key_board[event.unicode] = 2
+                    Input.key_board[event.key] = 2
                 elif event.type == pygame.KEYUP:
-                    Input.key_board[event.unicode] = 1
+                    Input.key_board[event.key] = 1
                 for event_func in events:
                     event_func(event)
 

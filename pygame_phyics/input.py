@@ -44,5 +44,6 @@ class Input:
     def input_keys(cls):
         keys = ""
         for k, v in cls.key_board.items():
-            keys += k
+            if v == 2:
+                keys += k
         return keys
