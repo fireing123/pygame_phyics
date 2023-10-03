@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html lang="ko" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pygame_phyics.error &#8212; pygame_phyics 0.3 문서</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b3523f8e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/groundwork.css?v=594d7a89" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+    <script src="../../_static/documentation_options.js?v=63d2165a"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/translations.js?v=b5f768d8"></script>
+    <link rel="index" title="색인" href="../../genindex.html" />
+    <link rel="search" title="검색" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>탐색</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="전체 색인"
+             accesskey="I">색인</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python 모듈 목록"
+             >모듈</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pygame_phyics 0.3 문서</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">모듈 코드</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pygame_phyics.error</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>pygame_phyics.error의 소스 코드</h1><div class="highlight"><pre>
+<span></span>
+<div class="viewcode-block" id="ImmutableAttributeError">
+<a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.error.ImmutableAttributeError">[문서]</a>
+<span class="k">class</span> <span class="nc">ImmutableAttributeError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">attribute_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s1">의 </span><span class="si">{</span><span class="n">attribute_name</span><span class="si">}</span><span class="s1"> 속성은 불변입니다. 값을 변경할 수 없습니다.&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="GameOver">
+<a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.error.GameOver">[문서]</a>
+<span class="k">class</span> <span class="nc">GameOver</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">빠른 검색</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="이동" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>탐색</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="전체 색인"
+             >색인</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python 모듈 목록"
+             >모듈</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pygame_phyics 0.3 문서</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >모듈 코드</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pygame_phyics.error</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; 저작권 2023, fireing123.
+      <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6 버전으로 생성되었습니다.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,401 @@
+
+<!DOCTYPE html>
+
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pygame_phyics.object &#8212; pygame_phyics 0.3 문서</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/groundwork.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/translations.js"></script>
+    <link rel="index" title="색인" href="../../genindex.html" />
+    <link rel="search" title="검색" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>탐색</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="전체 색인"
+             accesskey="I">색인</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python 모듈 목록"
+             >모듈</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pygame_phyics 0.3 문서</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">모듈 코드</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pygame_phyics.object</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>pygame_phyics.object의 소스 코드</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">기본 오브젝트 모듈</span>
+<span class="sd">여기서 상속받아 클래스를 만들면 된다</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">pygame</span>
+<span class="kn">import</span> <span class="nn">Box2D.b2</span> <span class="k">as</span> <span class="nn">b2</span>
+<span class="kn">import</span> <span class="nn">Box2D</span>
+<span class="kn">from</span> <span class="nn">pygame_phyics.manger</span> <span class="kn">import</span> <span class="n">Manger</span>
+<span class="kn">from</span> <span class="nn">pygame_phyics</span> <span class="kn">import</span> <span class="n">PPM</span>
+<span class="kn">from</span> <span class="nn">pygame_phyics.input</span> <span class="kn">import</span> <span class="n">Input</span>
+<span class="kn">from</span> <span class="nn">pygame_phyics.event</span> <span class="kn">import</span> <span class="n">Event</span>
+<span class="kn">import</span> <span class="nn">pygame_phyics.game</span> <span class="k">as</span> <span class="nn">game</span>
+
+<div class="viewcode-block" id="rotate_point_around_origin"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.rotate_point_around_origin">[문서]</a><span class="k">def</span> <span class="nf">rotate_point_around_origin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">angle_degrees</span><span class="p">):</span>
+    <span class="n">angle_radians</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle_degrees</span><span class="p">)</span>
+    <span class="n">new_x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle_radians</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle_radians</span><span class="p">)</span>
+    <span class="n">new_y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle_radians</span><span class="p">)</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle_radians</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span></div>
+
+<div class="viewcode-block" id="rotate_point_b_around_a"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.rotate_point_b_around_a">[문서]</a><span class="k">def</span> <span class="nf">rotate_point_b_around_a</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">angle_degrees</span><span class="p">):</span>
+    <span class="n">b_relative_to_a</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">rotated_b_relative_to_a</span> <span class="o">=</span> <span class="n">rotate_point_around_origin</span><span class="p">(</span><span class="n">b_relative_to_a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b_relative_to_a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angle_degrees</span><span class="p">)</span>
+    <span class="n">rotated_b</span> <span class="o">=</span> <span class="p">(</span><span class="n">rotated_b_relative_to_a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rotated_b_relative_to_a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">rotated_b</span></div>
+
+<div class="viewcode-block" id="Component"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Component">[문서]</a><span class="k">class</span> <span class="nc">Component</span><span class="p">:</span>
+<div class="viewcode-block" id="Component.on_mouse_enter"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Component.on_mouse_enter">[문서]</a>    <span class="k">def</span> <span class="nf">on_mouse_enter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="Component.on_mouse_stay"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Component.on_mouse_stay">[문서]</a>    <span class="k">def</span> <span class="nf">on_mouse_stay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="Component.on_mouse_exit"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Component.on_mouse_exit">[문서]</a>    <span class="k">def</span> <span class="nf">on_mouse_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="Component.update"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Component.update">[문서]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="Component.render"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Component.render">[문서]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+    
+<div class="viewcode-block" id="ImageObject"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.ImageObject">[문서]</a><span class="k">class</span> <span class="nc">ImageObject</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;오브젝트가 아님 오브젝트에 속성으로 사용&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">angle</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="nb">object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">og_image</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">og_image</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">get_rect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="n">angle</span>
+    
+<div class="viewcode-block" id="ImageObject.update"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.ImageObject.update">[문서]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;이미지에 위치 각도 등을 조정함&quot;&quot;&quot;</span>
+        
+        <span class="n">position</span> <span class="o">=</span> <span class="n">rotate_point_b_around_a</span><span class="p">([</span><span class="n">obj_pos</span> <span class="o">*</span> <span class="n">PPM</span> <span class="k">for</span> <span class="n">obj_pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">position</span><span class="p">],</span> <span class="p">[</span><span class="n">obj</span> <span class="o">*</span> <span class="n">PPM</span> <span class="o">+</span> <span class="n">pos</span> <span class="k">for</span> <span class="n">obj</span><span class="p">,</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">og_image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">get_rect</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span></div>
+
+<div class="viewcode-block" id="ImageObject.render"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.ImageObject.render">[문서]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="o">.</span><span class="n">centery</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">get_size</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="o">.</span><span class="n">centery</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="o">.</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">camera</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="o">.</span><span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">camera</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">surface</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="Joint"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Joint">[문서]</a><span class="k">class</span> <span class="nc">Joint</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;물리 연산의 연결 담당&quot;&quot;&quot;</span>
+    <span class="n">joints</span> <span class="o">=</span> <span class="p">[]</span>
+    
+<div class="viewcode-block" id="Joint.create_joint"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Joint.create_joint">[문서]</a>    <span class="k">def</span> <span class="nf">create_joint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency_hz</span><span class="p">,</span> <span class="n">damping_ratio</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;자기 자신과 인수로 받은 body 를 연결합니다&quot;&quot;&quot;</span>
+        
+        <span class="n">joint</span> <span class="o">=</span> <span class="n">Manger</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">CreateDistanceJoint</span><span class="p">(</span>
+            <span class="n">frequencyHz</span><span class="o">=</span><span class="n">frequency_hz</span><span class="p">,</span>
+            <span class="n">dampingRatio</span><span class="o">=</span><span class="n">damping_ratio</span><span class="p">,</span>
+            <span class="n">bodyA</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
+            <span class="n">bodyB</span><span class="o">=</span><span class="n">body</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
+            <span class="n">anchorA</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">anchorB</span><span class="o">=</span><span class="n">body</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">position</span>
+        <span class="p">)</span>
+        <span class="n">Joint</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">joint</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">joint</span></div></div>
+
+<div class="viewcode-block" id="object"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.object">[문서]</a><span class="k">class</span> <span class="nc">object</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;새상에 등록할수있는 가장 기초적인 오브젝트&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span>
+
+<div class="viewcode-block" id="object.delete"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.object.delete">[문서]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="n">Manger</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="object.instantiate"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.object.instantiate">[문서]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">instantiate</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="n">Manger</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="GameObject"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.GameObject">[문서]</a><span class="k">class</span> <span class="nc">GameObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;마우스 충돌 연산가능함&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="n">visible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collide</span> <span class="o">=</span> <span class="s1">&#39;out&#39;</span></div>
+    
+<div class="viewcode-block" id="circle_render"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.circle_render">[문서]</a><span class="k">def</span> <span class="nf">circle_render</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">):</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">transform</span> <span class="o">*</span> <span class="n">circle</span><span class="o">.</span><span class="n">pos</span> <span class="o">*</span> <span class="n">PPM</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">camera</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">surface</span><span class="o">.</span><span class="n">get_size</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">camera</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="mi">127</span><span class="p">,</span> <span class="mi">127</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">position</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">circle</span><span class="o">.</span><span class="n">radius</span> <span class="o">*</span> <span class="n">PPM</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span></div>
+<span class="n">Box2D</span><span class="o">.</span><span class="n">b2CircleShape</span><span class="o">.</span><span class="n">render</span> <span class="o">=</span> <span class="n">circle_render</span>
+
+<div class="viewcode-block" id="polygon_render"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.polygon_render">[문서]</a><span class="k">def</span> <span class="nf">polygon_render</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">):</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">body</span><span class="o">.</span><span class="n">transform</span> <span class="o">*</span> <span class="n">v</span><span class="p">)</span> <span class="o">*</span> <span class="n">PPM</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">polygon</span><span class="o">.</span><span class="n">vertices</span><span class="p">]</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">surface</span><span class="o">.</span><span class="n">get_size</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">]</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="p">[(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">camera</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">camera</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">]</span>
+    <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="mi">127</span><span class="p">,</span> <span class="mi">127</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="n">vertices</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+<span class="n">Box2D</span><span class="o">.</span><span class="n">b2PolygonShape</span><span class="o">.</span><span class="n">render</span> <span class="o">=</span> <span class="n">polygon_render</span>
+    
+<div class="viewcode-block" id="Phyics"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Phyics">[문서]</a><span class="k">class</span> <span class="nc">Phyics</span><span class="p">(</span><span class="n">GameObject</span><span class="p">,</span> <span class="n">Joint</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;물리오브젝트에 공통점&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="Phyics.delete"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Phyics.delete">[문서]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Manger</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">DestroyBody</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">GameObject</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">position</span>
+    
+    <span class="nd">@position</span><span class="o">.</span><span class="n">getter</span>
+    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">position</span>
+    
+    <span class="nd">@position</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">position</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">angle</span>
+    
+    <span class="nd">@angle</span><span class="o">.</span><span class="n">getter</span>
+    <span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">angle</span> <span class="o">*</span> <span class="mi">45</span>
+    
+    <span class="nd">@angle</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="n">value</span> <span class="o">/</span> <span class="mi">45</span></div>
+          
+<div class="viewcode-block" id="StaticObject"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.StaticObject">[문서]</a><span class="k">class</span> <span class="nc">StaticObject</span><span class="p">(</span><span class="n">Phyics</span><span class="p">):</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span>
+        <span class="n">position</span><span class="p">,</span> <span class="n">rotate</span><span class="p">,</span> <span class="n">scale</span> <span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span> <span class="n">shape_type</span><span class="p">,</span> <span class="n">collid_visible</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collid_visible</span> <span class="o">=</span> <span class="n">collid_visible</span>
+        <span class="k">match</span> <span class="n">shape_type</span><span class="p">:</span>
+            <span class="k">case</span> <span class="s2">&quot;chain&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">Box2D</span><span class="o">.</span><span class="n">b2ChainShape</span><span class="p">()</span>
+            <span class="k">case</span> <span class="s2">&quot;circle&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">Box2D</span><span class="o">.</span><span class="n">b2CircleShape</span><span class="p">()</span>
+            <span class="k">case</span> <span class="s2">&quot;edge&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">Box2D</span><span class="o">.</span><span class="n">b2EdgeShape</span><span class="p">(</span><span class="n">vertices</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+            <span class="k">case</span> <span class="s2">&quot;polygon&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">Box2D</span><span class="o">.</span><span class="n">b2PolygonShape</span><span class="p">(</span><span class="n">vertices</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="p">:</span> <span class="n">Box2D</span><span class="o">.</span><span class="n">b2Body</span> <span class="o">=</span> <span class="n">Manger</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">CreateStaticBody</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">angle</span><span class="o">=</span><span class="n">rotate</span><span class="p">,</span>
+            <span class="n">shapes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+            <span class="p">)</span>
+    
+<div class="viewcode-block" id="StaticObject.render"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.StaticObject.render">[문서]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">collid_visible</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fixture</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">:</span>
+                <span class="n">fixture</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="DynamicObject"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.DynamicObject">[문서]</a><span class="k">class</span> <span class="nc">DynamicObject</span><span class="p">(</span><span class="n">Phyics</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span>
+        <span class="n">position</span><span class="p">,</span> <span class="n">rotate</span><span class="p">,</span> <span class="n">scale</span> <span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span> <span class="n">shape_type</span><span class="p">,</span> <span class="n">collid_visible</span><span class="p">,</span>
+        <span class="n">density</span><span class="p">,</span> <span class="n">friction</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collid_visible</span> <span class="o">=</span> <span class="n">collid_visible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="p">:</span> <span class="n">Box2D</span><span class="o">.</span><span class="n">b2Body</span> <span class="o">=</span> <span class="n">Manger</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">CreateDynamicBody</span><span class="p">(</span>
+            <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+            <span class="n">angle</span><span class="o">=</span><span class="n">rotate</span>
+        <span class="p">)</span>
+        <span class="k">match</span> <span class="n">shape_type</span><span class="p">:</span>
+            <span class="k">case</span> <span class="s2">&quot;chain&quot;</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">case</span> <span class="s2">&quot;circle&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">CreateCircleFixture</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span> <span class="n">friction</span><span class="o">=</span><span class="n">friction</span><span class="p">)</span>
+            <span class="k">case</span> <span class="s2">&quot;edge&quot;</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">case</span> <span class="s2">&quot;polygon&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fixture</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">CreatePolygonFixture</span><span class="p">(</span><span class="n">vertices</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span> <span class="n">friction</span><span class="o">=</span><span class="n">friction</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="DynamicObject.render"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.DynamicObject.render">[문서]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">collid_visible</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fixture</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">:</span>
+                <span class="n">fixture</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="UI"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.UI">[문서]</a><span class="k">class</span> <span class="nc">UI</span><span class="p">(</span><span class="n">GameObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="n">angle</span></div>
+
+<div class="viewcode-block" id="Text"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Text">[문서]</a><span class="k">class</span> <span class="nc">Text</span><span class="p">(</span><span class="n">UI</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">Font</span><span class="p">,</span> <span class="n">interval</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">font</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">Font</span><span class="p">(</span><span class="n">Font</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="n">interval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    
+<div class="viewcode-block" id="Text.render"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Text.render">[문서]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface</span> <span class="p">:</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">):</span>
+        <span class="n">texts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">)</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">PPM</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">PPM</span>
+        <span class="n">x</span> <span class="o">-=</span> <span class="n">camera</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">-=</span> <span class="n">camera</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+            <span class="n">y</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span>
+        <span class="n">surface</span><span class="o">.</span><span class="n">blits</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">)))</span></div></div>
+
+<div class="viewcode-block" id="Button"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Button">[문서]</a><span class="k">class</span> <span class="nc">Button</span><span class="p">(</span><span class="n">UI</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">clicked</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">ImageObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span> <span class="o">=</span> <span class="n">ImageObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_click</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
+    
+<div class="viewcode-block" id="Button.on_mouse_stay"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Button.on_mouse_stay">[문서]</a>    <span class="k">def</span> <span class="nf">on_mouse_stay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">Input</span><span class="o">.</span><span class="n">get_mouse_down</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_click</span><span class="o">.</span><span class="n">invoke</span><span class="p">()</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span>
+        <span class="k">elif</span> <span class="n">Input</span><span class="o">.</span><span class="n">get_mouse_up</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span></div>
+    
+<div class="viewcode-block" id="Button.update"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Button.update">[문서]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="Button.render"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.Button.render">[문서]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span></div></div>
+    
+   
+<div class="viewcode-block" id="InputField"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.InputField">[문서]</a><span class="k">class</span> <span class="nc">InputField</span><span class="p">(</span><span class="n">UI</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">font</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">rect</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Surface</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">get_rect</span><span class="p">(</span><span class="n">topleft</span><span class="o">=</span><span class="p">[</span><span class="n">pos</span> <span class="o">*</span> <span class="n">PPM</span> <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">position</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">scale</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="p">,</span> <span class="n">font</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">focused</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_editing</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text_editing_pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stay</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_event</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
+        <span class="n">game</span><span class="o">.</span><span class="n">event_event</span><span class="o">.</span><span class="n">add_lisner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputfield_event</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="InputField.on_mouse_enter"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.InputField.on_mouse_enter">[문서]</a>    <span class="k">def</span> <span class="nf">on_mouse_enter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stay</span> <span class="o">=</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="InputField.on_mouse_stay"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.InputField.on_mouse_stay">[문서]</a>    <span class="k">def</span> <span class="nf">on_mouse_stay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">Input</span><span class="o">.</span><span class="n">get_mouse_down</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">focused</span> <span class="o">=</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="InputField.on_mouse_exit"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.InputField.on_mouse_exit">[문서]</a>    <span class="k">def</span> <span class="nf">on_mouse_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stay</span> <span class="o">=</span> <span class="kc">False</span></div>
+    
+<div class="viewcode-block" id="InputField.update"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.InputField.update">[문서]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">stay</span> <span class="ow">and</span> <span class="n">Input</span><span class="o">.</span><span class="n">get_mouse_down</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">focused</span> <span class="o">=</span> <span class="kc">False</span></div>
+    
+<div class="viewcode-block" id="InputField.inputfield_event"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.InputField.inputfield_event">[문서]</a>    <span class="k">def</span> <span class="nf">inputfield_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">focused</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">KEYDOWN</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">K_BACKSPACE</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span><span class="p">:]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">K_DELETE</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">K_LEFT</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">K_RIGHT</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pygame</span><span class="o">.</span><span class="n">K_KP_ENTER</span><span class="p">,</span> <span class="mi">13</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">TEXTEDITING</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">text_editing</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">text</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">text_editing_pos</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">start</span>
+            <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">TEXTINPUT</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">text_edit</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">text_editing</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span><span class="p">]</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">text</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span><span class="p">:]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_editing</span>
+            <span class="n">edit_text_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">editing_pos</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text_editing</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="n">edit_text_pos</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">text</span><span class="p">[</span><span class="n">edit_text_pos</span><span class="p">:]</span></div>
+
+<div class="viewcode-block" id="InputField.render"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.object.InputField.render">[문서]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">):</span>
+        <span class="n">surface</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">빠른 검색</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="이동" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>탐색</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="전체 색인"
+             >색인</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python 모듈 목록"
+             >모듈</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pygame_phyics 0.3 문서</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >모듈 코드</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pygame_phyics.object</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; 저작권 2023, fireing123.
+      <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2 버전으로 생성되었습니다.
+    </div>
+  </body>
+</html>
