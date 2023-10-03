@@ -1,17 +1,43 @@
+"""
+
+게임 모듈 
+
+Example:
+    게임의 초기 샛팅을 실행하고 
+    게임 맵을 정의하고
+    실행한다
+    literal blocks::
+
+        $ Game.init((1000, 800), "MyGame")
+        $
+        $ @pygame_phyics.world("example/example.json")
+        $ def main():
+        $   Game.loop([], [])
+        $   
+        $ main()
+
+"""
+
 import pygame
 from pygame import display
 
 from Box2D import b2World
 from pygame_phyics.manger import Manger
 from pygame_phyics.scene import Scene
-from pygame_phyics.event import Event
 from pygame_phyics.mouse import mouse_event
 from pygame_phyics.instantiate import import_module, import_classes
 from pygame_phyics.instantiate import load as instantiate_load
 from pygame_phyics.input import Input
+from pygame_phyics.event import Event
 import pygame_phyics.mouse as mouse
 
 def world(world_path):
+    """
+    함수를 새상으로 등록하는 데코레이터 입니다
+    
+    Args:
+        world_path (str) : json 경로
+    """
     def real_world(func):
         def wrapper():
             Manger.scene.darkening()
@@ -24,18 +50,10 @@ def world(world_path):
         return wrapper
     return real_world
 
-events = {
-    ""
-}
-
-def event(event_type):
-    def real_event(func):
-        return func
-    events[event_type] = real_event
-    return real_event
+event_event = Event()
 
 class Game:
-    
+    """게임 엔진"""
     is_running = True
     clock = pygame.time.Clock()
     time_step = 1 / 60
@@ -44,20 +62,23 @@ class Game:
     
     @classmethod
     def init(cls, size, title):
+        """개임 초기 샛팅입니다"""
         pygame.init()
         display.set_caption(title)
         Manger.init(
             display.set_mode(size),
             b2World(),
             Scene())
-        Manger.classes.update(import_classes('object', 'pygame_phyics/'))
+        Manger.classes.update(import_classes('object', './pygame_phyics/'))
     
     @classmethod
     def import_classes(cls, obj_dir):
+        """클래스들을 불러와 Manger 에 저장합니다"""
         Manger.classes.update(import_module(obj_dir))
         
     @classmethod
     def loop(cls, events=[], funcs=[]):
+        """이벤트랑 함수를 받아 반복문 안에서 실행합니다"""
         
         pygame.key.start_text_input()
         
@@ -103,6 +124,9 @@ class Game:
                     Input.key_board[event.key] = 2
                 elif event.type == pygame.KEYUP:
                     Input.key_board[event.key] = 1
+                    
+                event_event.invoke(event)
+                    
                 for event_func in events:
                     event_func(event)
 

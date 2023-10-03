@@ -18,7 +18,7 @@ def main():
     def draw():
         Manger.screen.fill((60, 60, 60, 255))
     
-    Game.loop([inputfield.inputfield_event], [draw])
+    Game.loop([], [draw])
 
 
 main()

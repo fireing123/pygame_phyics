@@ -1,12 +1,19 @@
+"""
+
+기본 오브젝트 모듈
+여기서 상속받아 클래스를 만들면 된다
+
+"""
+
 import math
 import pygame
 import Box2D.b2 as b2
 import Box2D
 from pygame_phyics.manger import Manger
 from pygame_phyics import PPM
-from pygame_phyics.error import ImmutableAttributeError
 from pygame_phyics.input import Input
 from pygame_phyics.event import Event
+import pygame_phyics.game as game
 
 def rotate_point_around_origin(x, y, angle_degrees):
     angle_radians = math.radians(angle_degrees)
@@ -33,6 +40,8 @@ class Component:
         pass
     
 class ImageObject(Component):
+    """오브젝트가 아님 오브젝트에 속성으로 사용"""
+    
     def __init__(self, object, image, position=(0, 0), angle=0):
         self.object = object
         self.og_image = pygame.image.load(image)
@@ -42,6 +51,8 @@ class ImageObject(Component):
         self.angle = angle
     
     def update(self):
+        """이미지에 위치 각도 등을 조정함"""
+        
         position = rotate_point_b_around_a([obj_pos * PPM for obj_pos in self.object.position], [obj * PPM + pos for obj, pos in zip(self.object.position, self.position)], self.object.angle)
         self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle)
         self.rect = self.image.get_rect(center=position)
@@ -53,9 +64,12 @@ class ImageObject(Component):
         surface.blit(self.image, self.rect)
 
 class Joint:
+    """물리 연산의 연결 담당"""
     joints = []
     
     def create_joint(self, frequency_hz, damping_ratio, body):
+        """자기 자신과 인수로 받은 body 를 연결합니다"""
+        
         joint = Manger.world.CreateDistanceJoint(
             frequencyHz=frequency_hz,
             dampingRatio=damping_ratio,
@@ -68,6 +82,7 @@ class Joint:
         return joint
 
 class object(Component):
+    """새상에 등록할수있는 가장 기초적인 오브젝트"""
     
     def __init__(self, name, layer, tag):
         self.name = name
@@ -82,6 +97,7 @@ class object(Component):
         Manger.scene.add(object)
 
 class GameObject(object):
+    """마우스 충돌 연산가능함"""
     
     def __init__(self, name: str, tag, visible, layer):
         super().__init__(name, layer, tag)
@@ -104,7 +120,8 @@ def polygon_render(polygon, body, surface, camera):
 Box2D.b2PolygonShape.render = polygon_render
     
 class Phyics(GameObject, Joint):
-
+    """물리오브젝트에 공통점"""
+    
     def delete(self):
         Manger.world.DestroyBody(self.body)
         GameObject.delete(self)
@@ -248,6 +265,7 @@ class InputField(UI):
         self.text_editing_pos = 0
         self.stay = False
         self.input_event = Event()
+        game.event_event.add_lisner(self.inputfield_event)
         
     def on_mouse_enter(self, pos):
         self.stay = True
