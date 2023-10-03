@@ -1,6 +1,5 @@
 class Input:
     """키보드나 마우스의 입력을 확인합니다"""
-    
     key_board = {}
     
     mouse_click = [0, 0, 0]

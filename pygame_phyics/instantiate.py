@@ -26,7 +26,7 @@ def import_module(import_dir):
             class_list.update(classes)
     return class_list
 
-def import_classes(file, dir):
+def import_classes(file: str, dir: str):
     """
     모듈에서 가져온 클래스를 리스트로 반환함
     

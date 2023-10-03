@@ -31,7 +31,7 @@ from pygame_phyics.input import Input
 from pygame_phyics.event import Event
 import pygame_phyics.mouse as mouse
 
-def world(world_path):
+def world(world_path: str):
     """
     함수를 새상으로 등록하는 데코레이터 입니다
     
@@ -61,7 +61,7 @@ class Game:
     pos_iters = 10
     
     @classmethod
-    def init(cls, size, title):
+    def init(cls, size : tuple[int, int], title : str):
         """개임 초기 샛팅입니다"""
         pygame.init()
         display.set_caption(title)
@@ -72,7 +72,7 @@ class Game:
         Manger.classes.update(import_classes('object', './pygame_phyics/'))
     
     @classmethod
-    def import_classes(cls, obj_dir):
+    def import_classes(cls, obj_dir : str):
         """클래스들을 불러와 Manger 에 저장합니다"""
         Manger.classes.update(import_module(obj_dir))
         
