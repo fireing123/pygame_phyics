@@ -69,7 +69,6 @@ class Game:
             display.set_mode(size),
             b2World(),
             Scene())
-        Manger.classes.update(import_classes('object', './pygame_phyics/'))
     
     @classmethod
     def import_classes(cls, obj_dir : str):
