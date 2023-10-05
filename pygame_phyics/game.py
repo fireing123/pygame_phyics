@@ -44,8 +44,10 @@ def world(world_path: str):
             Manger.world = b2World()
             Manger.scene = Scene()
             instantiate_load(world_path, Manger.classes)
+            start, event, update = func()
+            start()
             Manger.scene.brightening()
-            func()
+            Game.loop(event, update)
             del Manger.scene
         return wrapper
     return real_world
@@ -76,7 +78,7 @@ class Game:
         Manger.classes.update(import_module(obj_dir))
         
     @classmethod
-    def loop(cls, events=[], funcs=[]):
+    def loop(cls, events, func):
         """이벤트랑 함수를 받아 반복문 안에서 실행합니다"""
         
         pygame.key.start_text_input()
@@ -86,8 +88,7 @@ class Game:
             cls.clock.tick(60)
             
                     
-            for func in funcs:
-                func()
+            func()
             
             #collider event
             
@@ -125,9 +126,8 @@ class Game:
                     Input.key_board[event.key] = 1
                     
                 event_event.invoke(event)
-                    
-                for event_func in events:
-                    event_func(event)
+                
+                events(event)
 
             Manger.world.Step(
                 cls.time_step,

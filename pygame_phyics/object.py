@@ -265,6 +265,8 @@ class InputField(UI):
         self.text_editing_pos = 0
         self.stay = False
         self.input_event = Event()
+        self._last_update = 0
+        self._update = 600
         game.event_event.add_lisner(self.inputfield_event)
         
     def on_mouse_enter(self, pos):
@@ -280,7 +282,13 @@ class InputField(UI):
     def update(self):
         if not self.stay and Input.get_mouse_down(0):
             self.focused = False
-    
+        self.field.text = self.text + self.text_editing
+        edit_text_pos = self.editing_pos + len(self.text_editing)
+        if self.focused:
+            if not pygame.time.get_ticks() - self._last_update > self._update:
+                self.field.text = self.field.text[:edit_text_pos] + "|" + self.field.text[edit_text_pos:]
+            if pygame.time.get_ticks() - self._last_update > self._update*2:
+                self._last_update = pygame.time.get_ticks()
     def inputfield_event(self, event):
         if self.focused:
             if event.type == pygame.KEYDOWN:
@@ -296,22 +304,25 @@ class InputField(UI):
                     self.editing_pos = min(
                         len(self.text), self.editing_pos + 1
                     )
-                elif event.key in [pygame.K_KP_ENTER, 13]:
+                elif event.key == 13:
                     self.text += '\n'
                     self.editing_pos += 1
+                elif event.key == pygame.K_KP_ENTER:
+                    self.focused = False
+                    self.input_event.invoke()
             elif event.type == pygame.TEXTEDITING:
                 self.text_edit = True
                 self.text_editing = event.text
                 self.text_editing_pos = event.start
+                self._last_update = pygame.time.get_ticks()
             elif event.type == pygame.TEXTINPUT:
                 self.text_edit = False
                 self.text_editing = ""
                 self.text = self.text[:self.editing_pos] + event.text + self.text[self.editing_pos:]
                 self.editing_pos += len(event.text)
+                self._last_update = pygame.time.get_ticks()
 
-            self.field.text = self.text + self.text_editing
-            edit_text_pos = self.editing_pos + len(self.text_editing)
-            self.field.text = self.field.text[:edit_text_pos] + "|" + self.field.text[edit_text_pos:]
+            
 
     def render(self, surface, camera):
         surface.blit(self.image, self.rect)
