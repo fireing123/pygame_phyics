@@ -5,8 +5,8 @@
             "tag": "tag",
             "visible": true,
             "layer": 3,
-            "position": [20.0, 45.0],
-            "rotate": 1,
+            "position": [400.0, 180.0],
+            "rotate": 45,
             "scale": [[-1.5, -0.5],
             [1.5, -0.5],
             [1.5, 0.0],
@@ -24,7 +24,7 @@
             "tag": "tag",
             "visible": true,
             "layer": 3,
-            "position": [30.0, 45.0],
+            "position": [120.0, 180.0],
             "rotate": 0,
             "scale": 0.5,
             "shapeType" : "circle",
@@ -57,7 +57,7 @@
             "tag": "ta",
             "visible": true,
             "layer": 3,
-            "position": [0.0, 0.0],
+            "position": [0.0, 500.0],
             "angle": 0,
             "size": 50,
             "color":[255, 255, 255],
@@ -71,7 +71,7 @@
             "tag": "ta",
             "visible": true,
             "layer": 3,
-            "position": [20.0, 20.0],
+            "position": [400.0, 400.0],
             "angle": 0,
             "default": "./example/core.png",
             "clicked": "./example/bomb-skill.png"
@@ -83,13 +83,13 @@
             "tag": "ta",
             "visible": true,
             "layer": 3,
-            "position": [20.0, 25.0],
+            "position": [400.0, 100.0],
             "angle": 0,
             "scale": [50, 50],
             "color": [255, 255, 255],
             "font": "./example/Galmuri11.ttf",
             "interval":-10,
-            "rect": [320, 40]
+            "rect": [640, 80]
         }
     ]
 }

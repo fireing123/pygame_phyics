@@ -14,3 +14,4 @@ class Manger:
         cls.screen = screen
         cls.world = world
         cls.scene = scene
+        cls.WIDTH, cls.HEIGHT = screen.get_size()

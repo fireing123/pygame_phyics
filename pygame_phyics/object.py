@@ -13,19 +13,17 @@ from pygame_phyics.manger import Manger
 from pygame_phyics import PPM
 from pygame_phyics.input import Input
 from pygame_phyics.event import Event
+from pygame_phyics.error import ImmutableAttributeError
 import pygame_phyics.game as game
+import math
 
-def rotate_point_around_origin(x, y, angle_degrees):
-    angle_radians = math.radians(angle_degrees)
-    new_x = x * math.cos(angle_radians) - y * math.sin(angle_radians)
-    new_y = x * math.sin(angle_radians) + y * math.cos(angle_radians)
-    return new_x, new_y
-
-def rotate_point_b_around_a(a, b, angle_degrees):
-    b_relative_to_a = (b[0] - a[0], b[1] - a[1])
-    rotated_b_relative_to_a = rotate_point_around_origin(b_relative_to_a[0], b_relative_to_a[1], angle_degrees)
-    rotated_b = (rotated_b_relative_to_a[0] + a[0], rotated_b_relative_to_a[1] + a[1])
-    return rotated_b
+def rotate_point(point_a, point_b, angle_degrees):
+    angle_radians = math.radians(360 - angle_degrees)
+    x_b, y_b = point_b
+    x_a, y_a = point_a
+    x_b_rotated = (x_b - x_a) * math.cos(angle_radians) - (y_b - y_a) * math.sin(angle_radians) + x_a
+    y_b_rotated = (x_b - x_a) * math.sin(angle_radians) + (y_b - y_a) * math.cos(angle_radians) + y_a
+    return x_b_rotated, y_b_rotated
 
 class Component:
     def on_mouse_enter(self, pos):
@@ -42,26 +40,25 @@ class Component:
 class ImageObject(Component):
     """오브젝트가 아님 오브젝트에 속성으로 사용"""
     
-    def __init__(self, object, image, position=(0, 0), angle=0):
+    def __init__(self, object, image=None, position=(0, 0), angle=0, **kwargs):
         self.object = object
-        self.og_image = pygame.image.load(image)
+        self.og_image = pygame.image.load(image) if kwargs.get('surface') == None else pygame.Surface(kwargs['surface'])
         self.image = self.og_image
         self.rect = self.image.get_rect()
         self.position = position
         self.angle = angle
+        self.type = 'center' if kwargs.get('type') == None else kwargs['type']
     
     def update(self):
         """이미지에 위치 각도 등을 조정함"""
-        
-        position = rotate_point_b_around_a([obj_pos * PPM for obj_pos in self.object.position], [obj * PPM + pos for obj, pos in zip(self.object.position, self.position)], self.object.angle)
+        position = rotate_point(self.object.render_position, [obj - pos for obj, pos in zip(self.object.render_position, self.position)], self.object.angle)
         self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle)
-        self.rect = self.image.get_rect(center=position)
+        self.rect = self.image.get_rect()
+        setattr(self.rect, self.type, position)
         self.object.rect = self.rect
 
     def render(self, surface, camera):
-        self.rect.centery = surface.get_size()[1] - self.rect.centery
-        self.rect.center = self.rect.center[0] - camera.x, self.rect.center[1] - camera.y
-        surface.blit(self.image, self.rect)
+        surface.blit(self.image, camera(self.rect.topleft))
 
 class Joint:
     """물리 연산의 연결 담당"""
@@ -81,7 +78,7 @@ class Joint:
         Joint.joints.append(joint)
         return joint
 
-class object(Component):
+class Object(Component):
     """새상에 등록할수있는 가장 기초적인 오브젝트"""
     
     def __init__(self, name, layer, tag):
@@ -96,7 +93,7 @@ class object(Component):
     def instantiate(object):
         Manger.scene.add(object)
 
-class GameObject(object):
+class GameObject(Object):
     """마우스 충돌 연산가능함"""
     
     def __init__(self, name: str, tag, visible, layer):
@@ -105,22 +102,39 @@ class GameObject(object):
         self.rect = None
         self.collide = 'out'
     
+    @property
+    def render_position(self):
+        return self.position
+    
+    @render_position.getter
+    def render_position(self):
+        return self.position[0], Manger.HEIGHT - self.position[1]
+    
+    @render_position.setter
+    def render_position(self, value):
+        raise ImmutableAttributeError(__class__, "rander_position")
+    
 def circle_render(circle, body, surface, camera):
     position = body.transform * circle.pos * PPM
-    position = (position[0] - camera[0], surface.get_size()[1] - position[1] - camera[1])
+    position = (position[0] - camera[0], Manger.HEIGHT - position[1] - camera[1])
     pygame.draw.circle(surface, (127, 127, 127, 255), [int(
         x) for x in position], int(circle.radius * PPM), 1)
 Box2D.b2CircleShape.render = circle_render
 
 def polygon_render(polygon, body, surface, camera):
     vertices = [(body.transform * v) * PPM for v in polygon.vertices]
-    vertices = [(v[0], surface.get_size()[1] - v[1]) for v in vertices]
+    vertices = [(v[0], Manger.HEIGHT - v[1]) for v in vertices]
     vertices = [(v[0] - camera[0], v[1] - camera[1]) for v in vertices]
     pygame.draw.polygon(surface, (127, 127, 127, 255), vertices, 1)
 Box2D.b2PolygonShape.render = polygon_render
     
 class Phyics(GameObject, Joint):
     """물리오브젝트에 공통점"""
+    
+    def render(self, surface, camera):
+        if self.collid_visible:
+            for fixture in self.body.fixtures:
+                fixture.shape.render(self.body, surface, camera)
     
     def delete(self):
         Manger.world.DestroyBody(self.body)
@@ -132,12 +146,12 @@ class Phyics(GameObject, Joint):
     
     @position.getter
     def position(self):
-        return self.body.transform.position
+        return self.body.transform.position * PPM
     
     @position.setter
     def position(self, value):
-        self.body.transform.position
-    
+        self.body.transform.position = [v / PPM for v in value]
+        
     @property
     def angle(self):
         return self.body.angle
@@ -165,15 +179,11 @@ class StaticObject(Phyics):
             case "polygon":
                 self.shape = Box2D.b2PolygonShape(vertices=scale)
         self.body : Box2D.b2Body = Manger.world.CreateStaticBody(
-            position=position,
-            angle=rotate,
             shapes=self.shape
             )
+        self.position = position
+        self.angle = rotate
     
-    def render(self, surface, camera):
-        if self.collid_visible:
-            for fixture in self.body.fixtures:
-                fixture.shape.render(self.body, surface, camera)
 
 class DynamicObject(Phyics):
     def __init__(self, name, tag, visible, layer,
@@ -181,10 +191,9 @@ class DynamicObject(Phyics):
         density, friction):
         super().__init__(name, tag, visible, layer)
         self.collid_visible = collid_visible
-        self.body : Box2D.b2Body = Manger.world.CreateDynamicBody(
-            position=position,
-            angle=rotate
-        )
+        self.body : Box2D.b2Body = Manger.world.CreateDynamicBody()
+        self.position = position
+        self.angle = rotate
         match shape_type:
             case "chain":
                 pass
@@ -194,11 +203,6 @@ class DynamicObject(Phyics):
                 pass
             case "polygon":
                 self.fixture = self.body.CreatePolygonFixture(vertices=scale, density=density, friction=friction)
-    
-    def render(self, surface, camera):
-        if self.collid_visible:
-            for fixture in self.body.fixtures:
-                fixture.shape.render(self.body, surface, camera)
 
 class UI(GameObject):
     def __init__(self, name: str, tag, visible, layer, position, angle):
@@ -218,15 +222,12 @@ class Text(UI):
     def render(self, surface : pygame.Surface, camera):
         texts = self.text.split('\n')
         self.images = [self.font.render(text, True, self.color) for text in texts]
-        x = self.position[0] * PPM
-        y = self.position[1] * PPM
-        x -= camera[0]
-        y -= camera[1]
-        self.positions = []
+        x, y = camera(self.render_position)
+        positions = []
         for i in texts:
-            self.positions.append((x, y))
+            positions.append((x, y))
             y += self.size + self.interval
-        surface.blits(list(zip(self.images, self.positions)))
+        surface.blits(list(zip(self.images, positions)))
 
 class Button(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, default, clicked):
@@ -253,9 +254,8 @@ class Button(UI):
 class InputField(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, scale, color, font, interval, rect):
         super().__init__(name, tag, visible, layer, position, angle)
-        self.image = pygame.Surface(rect)
-        self.image.fill((0, 0, 0, 0))
-        self.rect = self.image.get_rect(topleft=[pos * PPM for pos in position])
+        self.image = ImageObject(self, surface=rect, type='topleft')
+        self.image.og_image.fill((0, 0, 0, 0))
         self.field = Text(name+"field", tag, visible, layer, position, angle, scale[1], color, font, interval)
         self.text = ""
         self.focused = False
@@ -280,6 +280,7 @@ class InputField(UI):
         self.stay = False
     
     def update(self):
+        self.image.update()
         if not self.stay and Input.get_mouse_down(0):
             self.focused = False
         self.field.text = self.text + self.text_editing
@@ -289,6 +290,7 @@ class InputField(UI):
                 self.field.text = self.field.text[:edit_text_pos] + "|" + self.field.text[edit_text_pos:]
             if pygame.time.get_ticks() - self._last_update > self._update*2:
                 self._last_update = pygame.time.get_ticks()
+    
     def inputfield_event(self, event):
         if self.focused:
             if event.type == pygame.KEYDOWN:
@@ -325,5 +327,5 @@ class InputField(UI):
             
 
     def render(self, surface, camera):
-        surface.blit(self.image, self.rect)
+        self.image.render(surface, camera)
         self.field.render(surface, camera)

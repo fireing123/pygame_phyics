@@ -25,7 +25,7 @@ from Box2D import b2World
 from pygame_phyics.manger import Manger
 from pygame_phyics.scene import Scene
 from pygame_phyics.mouse import mouse_event
-from pygame_phyics.instantiate import import_module, import_classes
+from pygame_phyics.instantiate import import_module
 from pygame_phyics.instantiate import load as instantiate_load
 from pygame_phyics.input import Input
 from pygame_phyics.event import Event

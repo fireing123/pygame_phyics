@@ -16,9 +16,18 @@ class Event:
     def __len__(self):
         return len(self.lisners)
     
+    def __iadd__(self, value):
+        self.add_lisner(value)
+    
+    def __isub__(self, value):
+        self.remove(value)
+    
     def add_lisner(self, function: Callable):
         """함수를 인자로 받아 함수를 등록합니다."""
         self.lisners.append(function)
+    
+    def remove(self, function: Callable):
+        self.lisners.remove(function)
     
     def invoke(self, *arg):
         """lisners의 함수들을 실행합니다."""
