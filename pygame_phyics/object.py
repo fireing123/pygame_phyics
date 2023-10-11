@@ -14,7 +14,9 @@ from pygame_phyics import PPM
 from pygame_phyics.input import Input
 from pygame_phyics.event import Event
 from pygame_phyics.error import ImmutableAttributeError
+from pygame_phyics.vector import Vector
 import pygame_phyics.game as game
+
 import math
 
 def rotate_point(point_a, point_b, angle_degrees):
@@ -42,23 +44,27 @@ class ImageObject(Component):
     
     def __init__(self, object, image=None, position=(0, 0), angle=0, **kwargs):
         self.object = object
+        self.visible = True
         self.og_image = pygame.image.load(image) if kwargs.get('surface') == None else pygame.Surface(kwargs['surface'])
         self.image = self.og_image
         self.rect = self.image.get_rect()
-        self.position = position
+        self.position = Vector(*position)
         self.angle = angle
         self.type = 'center' if kwargs.get('type') == None else kwargs['type']
     
     def update(self):
         """이미지에 위치 각도 등을 조정함"""
-        position = rotate_point(self.object.render_position, [obj - pos for obj, pos in zip(self.object.render_position, self.position)], self.object.angle)
+        obj_self = list(zip(self.object.render_position.xy, self.position.xy))
+        obj_self_ys = obj_self[1]
+        world_position = Vector(sum(obj_self[0]), obj_self_ys[0] - obj_self_ys[1])
+        position = self.object.render_position.rotate_vector(world_position, self.object.angle)
         self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle)
         self.rect = self.image.get_rect()
         setattr(self.rect, self.type, position)
-        self.object.rect = self.rect
 
     def render(self, surface, camera):
-        surface.blit(self.image, camera(self.rect.topleft))
+        if self.visible:
+            surface.blit(self.image, camera(self.rect.topleft)) 
 
 class Joint:
     """물리 연산의 연결 담당"""
@@ -66,13 +72,12 @@ class Joint:
     
     def create_joint(self, frequency_hz, damping_ratio, body):
         """자기 자신과 인수로 받은 body 를 연결합니다"""
-        
         joint = Manger.world.CreateDistanceJoint(
             frequencyHz=frequency_hz,
             dampingRatio=damping_ratio,
             bodyA=self.body,
             bodyB=body.body,
-            anchorA=self.position,
+            anchorA=self.body.transform.position,
             anchorB=body.body.transform.position
         )
         Joint.joints.append(joint)
@@ -104,11 +109,11 @@ class GameObject(Object):
     
     @property
     def render_position(self):
-        return self.position
+        return Vector
     
     @render_position.getter
     def render_position(self):
-        return self.position[0], Manger.HEIGHT - self.position[1]
+        return Vector(self.position.x, Manger.HEIGHT - self.position.y)
     
     @render_position.setter
     def render_position(self, value):
@@ -146,11 +151,13 @@ class Phyics(GameObject, Joint):
     
     @position.getter
     def position(self):
-        return self.body.transform.position * PPM
+        pos = self.body.transform.position * PPM
+        return Vector(pos.x, pos.y)
     
     @position.setter
-    def position(self, value):
-        self.body.transform.position = [v / PPM for v in value]
+    def position(self, value: Vector): # value 는 x, y 를 가지는 vector 로
+        self.body.transform.position.x = value.x / PPM
+        self.body.transform.position.y = value.y / PPM
         
     @property
     def angle(self):
@@ -181,7 +188,7 @@ class StaticObject(Phyics):
         self.body : Box2D.b2Body = Manger.world.CreateStaticBody(
             shapes=self.shape
             )
-        self.position = position
+        self.position = Vector(*position)
         self.angle = rotate
     
 
@@ -192,7 +199,7 @@ class DynamicObject(Phyics):
         super().__init__(name, tag, visible, layer)
         self.collid_visible = collid_visible
         self.body : Box2D.b2Body = Manger.world.CreateDynamicBody()
-        self.position = position
+        self.position = Vector(*position)
         self.angle = rotate
         match shape_type:
             case "chain":
@@ -207,8 +214,10 @@ class DynamicObject(Phyics):
 class UI(GameObject):
     def __init__(self, name: str, tag, visible, layer, position, angle):
         super().__init__(name, tag, visible, layer)
-        self.position = position
+        self.position : Vector = Vector(*position)
         self.angle = angle
+
+NEWLINE = '\n'
 
 class Text(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, size, color, Font, interval):
@@ -219,10 +228,23 @@ class Text(UI):
         self.color = color
         self.text = ""
     
+    def get_position(self, __index):
+        line = self.get_line(__index)
+        text = self.text[:__index].split(NEWLINE)[-1]
+        x, _ = self.font.size(text)
+        y = self.size + self.interval
+        y *= line
+        return Vector(x-5, -y)
+
+    def get_line(self, __index):
+        text = self.text[:__index]
+        line = text.count(NEWLINE)
+        return line
+
     def render(self, surface : pygame.Surface, camera):
-        texts = self.text.split('\n')
+        texts = self.text.split(NEWLINE)
         self.images = [self.font.render(text, True, self.color) for text in texts]
-        x, y = camera(self.render_position)
+        x, y = camera(self.render_position.xy)
         positions = []
         for i in texts:
             positions.append((x, y))
@@ -235,17 +257,21 @@ class Button(UI):
         self.default = ImageObject(self, default)
         self.clicked = ImageObject(self, clicked)
         self.image = self.default
+        self.rect = self.image.rect
         self.is_click = Event()
     
     def on_mouse_stay(self, pos):
         if Input.get_mouse_down(0):
             self.is_click.invoke() 
             self.image = self.clicked
+            self.rect = self.image.rect
         elif Input.get_mouse_up(0):
             self.image = self.default
+            self.rect = self.image.rect
     
     def update(self):
         self.image.update()
+        self.rect = self.image.rect
         
     def render(self, surface, camera):
         self.image.render(surface, camera)
@@ -255,6 +281,7 @@ class InputField(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, scale, color, font, interval, rect):
         super().__init__(name, tag, visible, layer, position, angle)
         self.image = ImageObject(self, surface=rect, type='topleft')
+        self.rect = self.image.rect
         self.image.og_image.fill((0, 0, 0, 0))
         self.field = Text(name+"field", tag, visible, layer, position, angle, scale[1], color, font, interval)
         self.text = ""
@@ -267,6 +294,8 @@ class InputField(UI):
         self.input_event = Event()
         self._last_update = 0
         self._update = 600
+        self.input_line = ImageObject(self, surface=(5, scale[1]), type="topleft")
+        self.input_line.og_image.fill((255,255,255))
         game.event_event.add_lisner(self.inputfield_event)
         
     def on_mouse_enter(self, pos):
@@ -280,6 +309,7 @@ class InputField(UI):
         self.stay = False
     
     def update(self):
+        self.rect = self.image.rect
         self.image.update()
         if not self.stay and Input.get_mouse_down(0):
             self.focused = False
@@ -287,9 +317,13 @@ class InputField(UI):
         edit_text_pos = self.editing_pos + len(self.text_editing)
         if self.focused:
             if not pygame.time.get_ticks() - self._last_update > self._update:
-                self.field.text = self.field.text[:edit_text_pos] + "|" + self.field.text[edit_text_pos:]
+                self.input_line.position = self.field.get_position(edit_text_pos)
+                self.input_line.visible = True
+            else:
+                self.input_line.visible = False
             if pygame.time.get_ticks() - self._last_update > self._update*2:
                 self._last_update = pygame.time.get_ticks()
+        self.input_line.update()
     
     def inputfield_event(self, event):
         if self.focused:
@@ -307,7 +341,7 @@ class InputField(UI):
                         len(self.text), self.editing_pos + 1
                     )
                 elif event.key == 13:
-                    self.text += '\n'
+                    self.text = self.text[:self.editing_pos] + '\n' + self.text[self.editing_pos:]
                     self.editing_pos += 1
                 elif event.key == pygame.K_KP_ENTER:
                     self.focused = False
@@ -324,8 +358,7 @@ class InputField(UI):
                 self.editing_pos += len(event.text)
                 self._last_update = pygame.time.get_ticks()
 
-            
-
     def render(self, surface, camera):
         self.image.render(surface, camera)
+        self.input_line.render(surface, camera)
         self.field.render(surface, camera)

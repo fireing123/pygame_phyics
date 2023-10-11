@@ -9,7 +9,7 @@ def mouse_event():
     
     try:
         for layer in Manger.scene.layers[::-1]:
-            for obj in layer:
+            for obj in layer[::-1]:
                 if obj.rect != None:
                     if obj.rect.collidepoint(get_pos()):
                         if obj.collide == 'out':
@@ -18,6 +18,7 @@ def mouse_event():
                             raise NotImplementedError
                         elif obj.collide == 'in':
                             obj.on_mouse_stay(get_pos())
+
                             raise NotImplementedError
                     elif obj.collide == 'in':
                         obj.collide = 'out'
