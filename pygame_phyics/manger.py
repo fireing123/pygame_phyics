@@ -7,11 +7,10 @@ class Manger:
     classes = {}
     
     @classmethod
-    def init(cls, screen: pygame.Surface, world : Box2D.b2World , scene):
+    def init(cls, screen: pygame.Surface, none_scene):
         """
         스크린, 물리, 일반을 저장함
         """
         cls.screen = screen
-        cls.world = world
-        cls.scene = scene
+        cls.scene = none_scene
         cls.WIDTH, cls.HEIGHT = screen.get_size()

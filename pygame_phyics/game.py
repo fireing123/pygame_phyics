@@ -26,12 +26,11 @@ from pygame_phyics.manger import Manger
 from pygame_phyics.scene import Scene
 from pygame_phyics.mouse import mouse_event
 from pygame_phyics.instantiate import import_module
-from pygame_phyics.instantiate import load as instantiate_load
 from pygame_phyics.input import Input
 from pygame_phyics.event import Event
 import pygame_phyics.mouse as mouse
 
-def world(world_path: str):
+def phyics_world(world_path: str):
     """
     함수를 새상으로 등록하는 데코레이터 입니다
     
@@ -43,14 +42,28 @@ def world(world_path: str):
             Manger.scene.darkening()
             Manger.world = b2World()
             Manger.scene = Scene()
-            instantiate_load(world_path, Manger.classes)
+            Manger.scene.load(world_path)
             start, event, update = func()
-            start()
+            start(Game)
             Manger.scene.brightening()
             Game.loop(event, update)
             del Manger.scene
         return wrapper
     return real_world
+
+def tile_map(path: str):
+    def real_tile_map(func):
+        def wrapper():
+            Manger.screen.darkening()
+            Manger.screen = Scene()
+            Manger.scene.load(path)
+            start, event, update = func()
+            start(Game)
+            Manger.scene.brightening()
+            Game.loop(event, update)
+            del Manger.scene
+        return wrapper
+    return real_tile_map
 
 event_event = Event()
 
@@ -67,16 +80,16 @@ class Game:
         """개임 초기 샛팅입니다"""
         pygame.init()
         display.set_caption(title)
-        Manger.init(
-            display.set_mode(size),
-            b2World(),
-            Scene())
+        Manger.init(display.set_mode(size), Scene())
     
     @classmethod
     def import_classes(cls, obj_dir : str):
         """클래스들을 불러와 Manger 에 저장합니다"""
         Manger.classes.update(import_module(obj_dir))
         
+    def stop(self):
+        self.is_running = False
+    
     @classmethod
     def loop(cls, events, func):
         """이벤트랑 함수를 받아 반복문 안에서 실행합니다"""
@@ -88,7 +101,7 @@ class Game:
             cls.clock.tick(60)
             
                     
-            func()
+            func(cls)
             
             #collider event
             
@@ -127,7 +140,7 @@ class Game:
                     
                 event_event.invoke(event)
                 
-                events(event)
+                events(cls, event)
 
             Manger.world.Step(
                 cls.time_step,

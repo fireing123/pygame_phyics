@@ -8,7 +8,6 @@ from pygame_phyics.manger import Manger
 from pygame_phyics.game import Game
 import pygame_phyics.game as game
 
-world = game.world
 
 import pygame_phyics.mouse as mouse
 import pygame_phyics.object as object

@@ -1,5 +1,7 @@
+import pygame_phyics.util as _util
 from typing import List
-
+from pygame_phyics.object import *
+from pygame_phyics.manger import Manger
 class Camera:
     def __init__(self):
         self.__x = 0
@@ -136,3 +138,34 @@ class Scene:
         따로 override 해서 사용하세요
         """
         pass
+
+    def load(self, path: str):
+        """
+        오브젝트를 생성하고 새계에 등록합니다
+
+        Args:
+            path (str): 경로
+            class_list (list): 임포트한 클래스 리스트
+
+        Raises:
+            ImportError: path 경로에 json 에서 class_list 에 존재하지 않는 클래스를 불러오려 할때
+        """
+        json : dict = _util.jsopen(path)
+        setting = json['setting']
+        
+        if setting.get('camera'):
+            self.camera.x = setting['camera'][0]
+            self.camera.y = setting['camera'][1]
+        
+        
+        objs = json['objs']
+        for name in objs.keys():
+            for json_object in objs[name]:
+                args = list(json_object.values())
+                prefab_class = Manger.classes.get(name)
+                if prefab_class == None:
+                    prefab_class = globals()[name]
+                    if prefab_class == None:
+                        raise ImportError(f"{name} 클레스가 존재하지 않거나 불러지지 않았습니다. \n 현재 불러온 클래스 {Manger.classes}")
+                prefab = prefab_class(*args)
+                GameObject.instantiate(prefab)
