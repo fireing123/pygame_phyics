@@ -50,27 +50,3 @@ def import_classes(file: str, dir: str):
         print(f"모듈 {file}을(를) 임포트하는 중 오류 발생: {e}")
     finally:
         return class_list
-from pygame_phyics.object import *
-def load(path: str, class_list):
-    """
-    오브젝트를 생성하고 새계에 등록합니다
-    
-    Args:
-        path (str): 경로
-        class_list (list): 임포트한 클래스 리스트
-        
-    Raises:
-        ImportError: path 경로에 json 에서 class_list 에 존재하지 않는 클래스를 불러오려 할때
-    """
-    with open(path, 'r') as f:
-        js : Dict = json.loads(f.read())
-        for name in js.keys():
-            for json_object in js[name]:
-                args = list(json_object.values())
-                prefab_class = class_list.get(name)
-                if prefab_class == None:
-                    prefab_class = globals()[name]
-                    if prefab_class == None:
-                        raise ImportError(f"{name} 클레스가 존재하지 않거나 불러지지 않았습니다. \n 현재 불러온 클래스 {class_list}")
-                prefab = prefab_class(*args)
-                GameObject.instantiate(prefab)

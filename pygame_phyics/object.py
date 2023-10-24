@@ -16,7 +16,6 @@ from pygame_phyics.event import Event
 from pygame_phyics.error import ImmutableAttributeError
 from pygame_phyics.vector import Vector
 import pygame_phyics.game as game
-
 import math
 
 def rotate_point(point_a, point_b, angle_degrees):
@@ -345,7 +344,7 @@ class InputField(UI):
                     self.editing_pos += 1
                 elif event.key == pygame.K_KP_ENTER:
                     self.focused = False
-                    self.input_event.invoke()
+                    self.input_event.invoke(self.text)
             elif event.type == pygame.TEXTEDITING:
                 self.text_edit = True
                 self.text_editing = event.text
@@ -362,3 +361,10 @@ class InputField(UI):
         self.image.render(surface, camera)
         self.input_line.render(surface, camera)
         self.field.render(surface, camera)
+
+class TileMap(GameObject):
+    def __init__(self, name: str, tag, visible, layer, tiles, data):
+        super().__init__(name, tag, visible, layer)
+
+class RectTileMap(TileMap):
+    pass
