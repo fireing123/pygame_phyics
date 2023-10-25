@@ -84,6 +84,22 @@ pygame\_phyics.sheet module
    :undoc-members:
    :show-inheritance:
 
+pygame\_phyics.util module
+--------------------------
+
+.. automodule:: pygame_phyics.util
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygame\_phyics.vector module
+----------------------------
+
+.. automodule:: pygame_phyics.vector
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
