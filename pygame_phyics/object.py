@@ -27,6 +27,8 @@ def rotate_point(point_a, point_b, angle_degrees):
     return x_b_rotated, y_b_rotated
 
 class Component:
+    def on_collide_enter(self, object):
+        pass
     def on_mouse_enter(self, pos):
         pass
     def on_mouse_stay(self, pos):
@@ -117,14 +119,13 @@ class GameObject(Object):
     @render_position.setter
     def render_position(self, value):
         raise ImmutableAttributeError(__class__, "rander_position")
-    
+
 def circle_render(circle, body, surface, camera):
     position = body.transform * circle.pos * PPM
     position = (position[0] - camera[0], Manger.HEIGHT - position[1] - camera[1])
     pygame.draw.circle(surface, (127, 127, 127, 255), [int(
         x) for x in position], int(circle.radius * PPM), 1)
 Box2D.b2CircleShape.render = circle_render
-
 def polygon_render(polygon, body, surface, camera):
     vertices = [(body.transform * v) * PPM for v in polygon.vertices]
     vertices = [(v[0], Manger.HEIGHT - v[1]) for v in vertices]
@@ -143,6 +144,7 @@ class Phyics(GameObject, Joint):
     def delete(self):
         Manger.world.DestroyBody(self.body)
         GameObject.delete(self)
+    
     
     @property
     def position(self):
@@ -169,7 +171,7 @@ class Phyics(GameObject, Joint):
     @angle.setter
     def angle(self, value):
         self.body.angle = value / 45
-          
+
 class StaticObject(Phyics): 
     def __init__(self, name, tag, visible, layer,
         position, rotate, scale : tuple | float, shape_type, collid_visible):
@@ -187,6 +189,7 @@ class StaticObject(Phyics):
         self.body : Box2D.b2Body = Manger.world.CreateStaticBody(
             shapes=self.shape
             )
+        self.body.userData = self
         self.position = Vector(*position)
         self.angle = rotate
     
@@ -198,6 +201,7 @@ class DynamicObject(Phyics):
         super().__init__(name, tag, visible, layer)
         self.collid_visible = collid_visible
         self.body : Box2D.b2Body = Manger.world.CreateDynamicBody()
+        self.body.userData = self
         self.position = Vector(*position)
         self.angle = rotate
         match shape_type:

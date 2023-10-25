@@ -8,7 +8,10 @@ class Rect(DynamicObject):
         super().__init__(name, tag, visible, layer, position, rotate, scale, shape_type, collid_visible, density, friction)
         self.image = ImageObject(self, "./example/core.png", (0, 50), 0)
         self.rect = self.image.rect
-        
+    
+    def on_collide_enter(self, obj):
+        print(obj.name)
+    
     def on_mouse_enter(self, pos):
         print('enter')
 

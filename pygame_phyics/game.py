@@ -21,7 +21,7 @@ Example:
 import pygame
 from pygame import display
 
-from Box2D import b2World
+from Box2D import b2World, b2ContactListener
 from pygame_phyics.manger import Manger
 from pygame_phyics.scene import Scene
 from pygame_phyics.mouse import mouse_event
@@ -29,6 +29,15 @@ from pygame_phyics.instantiate import import_module
 from pygame_phyics.input import Input
 from pygame_phyics.event import Event
 import pygame_phyics.mouse as mouse
+
+class ContactListener(b2ContactListener):
+    def BeginContact(self, contact):
+        fixtureA = contact.fixtureA
+        fixtureB = contact.fixtureB
+        a_obj = fixtureA.body.userData 
+        b_obj = fixtureB.body.userData
+        a_obj.on_collide_enter(b_obj)
+        b_obj.on_collide_enter(a_obj)
 
 def phyics_world(world_path: str):
     """
@@ -41,6 +50,8 @@ def phyics_world(world_path: str):
         def wrapper():
             Manger.scene.darkening()
             Manger.world = b2World()
+            contact_listener = ContactListener()
+            Manger.world.contactListener = contact_listener
             Manger.scene = Scene()
             Manger.scene.load(world_path)
             start, event, update = func()
@@ -48,22 +59,9 @@ def phyics_world(world_path: str):
             Manger.scene.brightening()
             Game.loop(event, update)
             del Manger.scene
+            del Manger.world
         return wrapper
     return real_world
-
-def tile_map(path: str):
-    def real_tile_map(func):
-        def wrapper():
-            Manger.screen.darkening()
-            Manger.screen = Scene()
-            Manger.scene.load(path)
-            start, event, update = func()
-            start(Game)
-            Manger.scene.brightening()
-            Game.loop(event, update)
-            del Manger.scene
-        return wrapper
-    return real_tile_map
 
 event_event = Event()
 
