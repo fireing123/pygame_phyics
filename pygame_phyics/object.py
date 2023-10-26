@@ -27,7 +27,7 @@ def rotate_point(point_a, point_b, angle_degrees):
     return x_b_rotated, y_b_rotated
 
 class Component:
-    def on_collide_enter(self, object):
+    def on_collide_enter(self, objectpy):
         pass
     def on_mouse_enter(self, pos):
         pass

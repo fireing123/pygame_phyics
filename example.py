@@ -9,7 +9,7 @@ Game.init((1000, 800), "MyGame")
 
 Game.import_classes("example/objects/")
 
-@game.phyics_world("example/example.json")
+@game.world("example/example.json")
 def example():
     rect : DynamicObject= Manger.scene.get_objects("hello")[0]
     circle = Manger.scene.get_objects("ello")[0]

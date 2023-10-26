@@ -39,7 +39,7 @@ class ContactListener(b2ContactListener):
         a_obj.on_collide_enter(b_obj)
         b_obj.on_collide_enter(a_obj)
 
-def phyics_world(world_path: str):
+def world(world_path: str):
     """
     함수를 새상으로 등록하는 데코레이터 입니다
     
