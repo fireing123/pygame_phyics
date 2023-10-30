@@ -27,8 +27,6 @@ def rotate_point(point_a, point_b, angle_degrees):
     return x_b_rotated, y_b_rotated
 
 class Component:
-    def on_collide_enter(self, objectpy):
-        pass
     def on_mouse_enter(self, pos):
         pass
     def on_mouse_stay(self, pos):
@@ -85,7 +83,10 @@ class Joint:
         return joint
 
 class Object(Component):
-    """새상에 등록할수있는 가장 기초적인 오브젝트"""
+    """
+    새상에 등록할수있는 가장 기초적인 오브젝트
+    save 사용시 주의사항: 파라미터랑 저장용 값이랑 이름이 같아야함9
+    """
     
     def __init__(self, name, layer, tag):
         self.name = name
@@ -93,6 +94,8 @@ class Object(Component):
         self.layer = layer
 
     def delete(self): 
+        self.name = None
+        self.tag = None
         Manger.scene.remove(self)
 
     @staticmethod
@@ -136,8 +139,18 @@ Box2D.b2PolygonShape.render = polygon_render
 class Phyics(GameObject, Joint):
     """물리오브젝트에 공통점"""
     
+    def __init__(self, name: str, tag, visible, layer):
+        GameObject.__init__(self, name, tag, visible, layer)
+        self.collide_enter = None
+    
+    def on_collision_enter(self, collision):
+        pass
+    
+    def clean_collision(self):
+        self.collide_enter = None
+    
     def render(self, surface, camera):
-        if self.collid_visible:
+        if self.collide_visible:
             for fixture in self.body.fixtures:
                 fixture.shape.render(self.body, surface, camera)
     
@@ -174,9 +187,9 @@ class Phyics(GameObject, Joint):
 
 class StaticObject(Phyics): 
     def __init__(self, name, tag, visible, layer,
-        position, rotate, scale : tuple | float, shape_type, collid_visible):
+        position, rotate, scale, shape_type, collide_visible):
         super().__init__(name, tag, visible, layer)
-        self.collid_visible = collid_visible
+        self.collide_visible = collide_visible
         match shape_type:
             case "chain":
                 self.shape = Box2D.b2ChainShape()
@@ -196,10 +209,10 @@ class StaticObject(Phyics):
 
 class DynamicObject(Phyics):
     def __init__(self, name, tag, visible, layer,
-        position, rotate, scale : tuple | float, shape_type, collid_visible,
+        position, rotate, scale : tuple | float, shape_type, collide_visible,
         density, friction):
         super().__init__(name, tag, visible, layer)
-        self.collid_visible = collid_visible
+        self.collide_visible = collide_visible
         self.body : Box2D.b2Body = Manger.world.CreateDynamicBody()
         self.body.userData = self
         self.position = Vector(*position)
@@ -225,6 +238,7 @@ NEWLINE = '\n'
 class Text(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, size, color, Font, interval):
         super().__init__(name, tag, visible, layer, position, angle)
+        self.Font = Font
         self.font = pygame.font.Font(Font, size)
         self.size = size
         self.interval = interval

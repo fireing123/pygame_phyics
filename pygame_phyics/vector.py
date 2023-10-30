@@ -12,7 +12,22 @@ class Vector:
     def __init__(self, x: float, y:float):
         self.x = x
         self.y = y
-        
+        self.index = 0
+    
+    def isiter(): pass
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        if self.index < 2:
+            item = (self.x, self.y)[self.index]
+            self.index += 1
+            return item
+        else:
+            raise StopIteration
+    
+    
     @const
     def xy(self):
         return self.x, self.y

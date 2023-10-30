@@ -36,8 +36,10 @@ class ContactListener(b2ContactListener):
         fixtureB = contact.fixtureB
         a_obj = fixtureA.body.userData 
         b_obj = fixtureB.body.userData
-        a_obj.on_collide_enter(b_obj)
-        b_obj.on_collide_enter(a_obj)
+        if a_obj != None:
+            a_obj.collide_enter = b_obj
+        if b_obj != None:
+            b_obj.collide_enter = a_obj
 
 def world(world_path: str):
     """
@@ -121,6 +123,8 @@ class Game:
             mouse_event()
             
             Manger.scene.update()
+            
+            Manger.scene.on_collision_enter()
             
             for key, value in Input.key_board.items():
                 if value == 2:

@@ -2,6 +2,7 @@ import pygame_phyics.util as _util
 from typing import List
 from pygame_phyics.object import *
 from pygame_phyics.manger import Manger
+import inspect
 class Camera:
     def __init__(self):
         self.__x = 0
@@ -54,14 +55,26 @@ class Scene:
         self.camera = Camera()
         self.layers = [[],[],[],[],[],[],[],[]]
     
-    def layer_loop(self, method, *args):
+    def layer_loop(self, method, *args, **kwargs):
         for layer in self.layers:
             for obj in layer:
-                func = getattr(obj, method)
-                func(*args)
-    
+                if kwargs.get("only") == "phyics":
+                    if isinstance(obj, Phyics):
+                        func = getattr(obj, method)
+                        func(*args)
+                elif kwargs.get('collide'):
+                    if getattr(obj, "collide_enter", None) != None:
+                        func = getattr(obj, method)
+                        func(obj.collide_enter)
+                else:
+                    func = getattr(obj, method)
+                    func(*args)
     def update(self):
         self.layer_loop("update")
+    
+    def on_collision_enter(self):
+        self.layer_loop("on_collision_enter", collide=True)
+        self.layer_loop("clean_collision", only="phyics")
     
     def render(self, surface):
         self.layer_loop("render", surface, self.camera)
@@ -151,12 +164,14 @@ class Scene:
             ImportError: path 경로에 json 에서 class_list 에 존재하지 않는 클래스를 불러오려 할때
         """
         json : dict = _util.jsopen(path)
-        setting = json['setting']
+        setting : dict = json['setting']
         
         if setting.get('camera'):
             self.camera.x = setting['camera'][0]
             self.camera.y = setting['camera'][1]
-        
+        setting.pop('camera')
+        for key, value in setting.items():
+            setattr(Manger, key, value)
         
         objs = json['objs']
         for name in objs.keys():
