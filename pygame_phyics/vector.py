@@ -2,7 +2,6 @@ from collections.abc import Callable
 import math
 from typing import Any
 from pygame_phyics.error import ImmutableAttributeError
-from multipledispatch import dispatch
 
 class const(property):
     def setter(self):

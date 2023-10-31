@@ -4,6 +4,10 @@ class ImmutableAttributeError(Exception):
         self.message = f'{cls}의 {attribute_name} 속성은 불변입니다. 값을 변경할 수 없습니다.'
         super().__init__(self.message)
     
+class JsonSerializableError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+    
 class GameOver(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
