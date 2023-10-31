@@ -25,6 +25,7 @@ class Vector:
             self.index += 1
             return item
         else:
+            self.index = 0
             raise StopIteration
     
     
