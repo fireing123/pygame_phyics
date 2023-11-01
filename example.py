@@ -22,8 +22,12 @@ def example():
             print(text)
         inputfield.input_event.add_lisner(inputd)
     def event(cls, event):
-        if event.type == pygame.K_q:
-            cls.stop()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                cls.stop()
+            if event.key == pygame.K_w:
+                Manger.scene.camera.angle += 10
+                print(Manger.scene.camera.angle)
     def update(cls):
         Manger.screen.fill((60, 60, 60, 255))
     return start, event, update

@@ -1,10 +1,13 @@
 
 class ImmutableAttributeError(Exception):
-    def __init__(self, cls, attribute_name: str):
-        self.message = f'{cls}의 {attribute_name} 속성은 불변입니다. 값을 변경할 수 없습니다.'
-        super().__init__(self.message)
+    def __init__(self, *args):
+        super().__init__(*args)
     
 class JsonSerializableError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+    
+class FunctionError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
     

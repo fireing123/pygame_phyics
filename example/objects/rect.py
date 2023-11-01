@@ -4,8 +4,8 @@ from pygame_phyics import StaticObject
 from pygame_phyics.object import ImageObject
 from pygame_phyics.input import Input
 class Rect(DynamicObject):
-    def __init__(self, name, tag, visible, layer, position, rotate, scale: tuple | float, shape_type, collid_visible, density, friction):
-        super().__init__(name, tag, visible, layer, position, rotate, scale, shape_type, collid_visible, density, friction)
+    def __init__(self, name, tag, visible, layer, position, rotate, scale: tuple | float, shape_type, collide_visible, density, friction):
+        super().__init__(name, tag, visible, layer, position, rotate, scale, shape_type, collide_visible, density, friction)
         self.image = ImageObject(self, "./example/core.png", (0, 50), 0)
         self.rect = self.image.rect
     

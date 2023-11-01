@@ -13,18 +13,12 @@ from pygame_phyics.manger import Manger
 from pygame_phyics import PPM
 from pygame_phyics.input import Input
 from pygame_phyics.event import Event
-from pygame_phyics.error import ImmutableAttributeError
+import pygame_phyics.util as util
 from pygame_phyics.vector import Vector
+from pygame_phyics.timertask import TimerTask
 import pygame_phyics.game as game
 import math
 
-def rotate_point(point_a, point_b, angle_degrees):
-    angle_radians = math.radians(360 - angle_degrees)
-    x_b, y_b = point_b
-    x_a, y_a = point_a
-    x_b_rotated = (x_b - x_a) * math.cos(angle_radians) - (y_b - y_a) * math.sin(angle_radians) + x_a
-    y_b_rotated = (x_b - x_a) * math.sin(angle_radians) + (y_b - y_a) * math.cos(angle_radians) + y_a
-    return x_b_rotated, y_b_rotated
 
 class Component:
     def on_mouse_enter(self, pos):
@@ -44,7 +38,7 @@ class ImageObject(Component):
     def __init__(self, object, image=None, position=(0, 0), angle=0, **kwargs):
         self.object = object
         self.visible = True
-        self.og_image = pygame.image.load(image) if kwargs.get('surface') == None else pygame.Surface(kwargs['surface'])
+        self.og_image = pygame.image.load(image) if kwargs.get('surface') == None else pygame.Surface(kwargs['surface'], pygame.SRCALPHA)
         self.image = self.og_image
         self.rect = self.image.get_rect()
         self.position = Vector(*position)
@@ -55,11 +49,14 @@ class ImageObject(Component):
         """이미지에 위치 각도 등을 조정함"""
         obj_self = list(zip(self.object.render_position.xy, self.position.xy))
         obj_self_ys = obj_self[1]
+        
         world_position = Vector(sum(obj_self[0]), obj_self_ys[0] - obj_self_ys[1])
+        
         position = self.object.render_position.rotate_vector(world_position, self.object.angle)
-        self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle)
+        
+        self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle + Manger.scene.camera.angle)
         self.rect = self.image.get_rect()
-        setattr(self.rect, self.type, position)
+        setattr(self.rect, self.type, position.xy)
 
     def render(self, surface, camera):
         if self.visible:
@@ -111,17 +108,10 @@ class GameObject(Object):
         self.rect = None
         self.collide = 'out'
     
-    @property
-    def render_position(self):
-        return Vector
-    
-    @render_position.getter
+    @util.getter
     def render_position(self):
         return Vector(self.position.x, Manger.HEIGHT - self.position.y)
-    
-    @render_position.setter
-    def render_position(self, value):
-        raise ImmutableAttributeError(__class__, "rander_position")
+
 
 def circle_render(circle, body, surface, camera):
     position = body.transform * circle.pos * PPM
@@ -161,12 +151,9 @@ class Phyics(GameObject, Joint):
     
     @property
     def position(self):
-        return self.body.transform.position
-    
-    @position.getter
-    def position(self):
         pos = self.body.transform.position * PPM
         return Vector(pos.x, pos.y)
+
     
     @position.setter
     def position(self, value: Vector): # value 는 x, y 를 가지는 vector 로
@@ -175,12 +162,8 @@ class Phyics(GameObject, Joint):
         
     @property
     def angle(self):
-        return self.body.angle
-    
-    @angle.getter
-    def angle(self):
         return self.body.angle * 45
-    
+
     @angle.setter
     def angle(self, value):
         self.body.angle = value / 45
@@ -192,9 +175,9 @@ class StaticObject(Phyics):
         self.collide_visible = collide_visible
         match shape_type:
             case "chain":
-                self.shape = Box2D.b2ChainShape()
+                self.shape = Box2D.b2ChainShape(vertices_chain=scale)
             case "circle":
-                self.shape = Box2D.b2CircleShape()
+                self.shape = Box2D.b2CircleShape(radius=scale)
             case "edge":
                 self.shape = Box2D.b2EdgeShape(vertices=scale)
             case "polygon":
@@ -219,11 +202,11 @@ class DynamicObject(Phyics):
         self.angle = rotate
         match shape_type:
             case "chain":
-                pass
+                self.shape = self.body.CreateChainFixture(vertices_chain=scale, density=density, friction=friction)
             case "circle":
                 self.shape = self.body.CreateCircleFixture(radius=scale, density=density, friction=friction)
             case "edge":
-                pass
+                self.shape = self.body.CreateEdgeFixture(vertices=scale, density=density, friction=friction)
             case "polygon":
                 self.fixture = self.body.CreatePolygonFixture(vertices=scale, density=density, friction=friction)
 
@@ -261,7 +244,7 @@ class Text(UI):
     def render(self, surface : pygame.Surface, camera):
         texts = self.text.split(NEWLINE)
         self.images = [self.font.render(text, True, self.color) for text in texts]
-        x, y = camera(self.render_position.xy)
+        x, y = camera(self.render_position)
         positions = []
         for i in texts:
             positions.append((x, y))
@@ -299,7 +282,7 @@ class InputField(UI):
         super().__init__(name, tag, visible, layer, position, angle)
         self.image = ImageObject(self, surface=rect, type='topleft')
         self.rect = self.image.rect
-        self.image.og_image.fill((0, 0, 0, 0))
+        self.image.og_image.fill((0, 0, 0, 128))
         self.field = Text(name+"field", tag, visible, layer, position, angle, scale[1], color, font, interval)
         self.text = ""
         self.focused = False
@@ -309,11 +292,13 @@ class InputField(UI):
         self.text_editing_pos = 0
         self.stay = False
         self.input_event = Event()
-        self._last_update = 0
-        self._update = 600
+        self.timertask = TimerTask(600, self.toggle_bar)
         self.input_line = ImageObject(self, surface=(5, scale[1]), type="topleft")
-        self.input_line.og_image.fill((255,255,255))
+        self.input_line.og_image.fill((255,255,255, 0))
         game.event_event.add_lisner(self.inputfield_event)
+        
+    def toggle_bar(self):
+        self.input_line.visible = not self.input_line.visible
         
     def on_mouse_enter(self, pos):
         self.stay = True
@@ -328,18 +313,17 @@ class InputField(UI):
     def update(self):
         self.rect = self.image.rect
         self.image.update()
+        
         if not self.stay and Input.get_mouse_down(0):
             self.focused = False
         self.field.text = self.text + self.text_editing
         edit_text_pos = self.editing_pos + len(self.text_editing)
+        
         if self.focused:
-            if not pygame.time.get_ticks() - self._last_update > self._update:
+            self.timertask.run_periodic_task()
+            
+            if self.input_line.visible:
                 self.input_line.position = self.field.get_position(edit_text_pos)
-                self.input_line.visible = True
-            else:
-                self.input_line.visible = False
-            if pygame.time.get_ticks() - self._last_update > self._update*2:
-                self._last_update = pygame.time.get_ticks()
         self.input_line.update()
     
     def inputfield_event(self, event):
@@ -347,10 +331,13 @@ class InputField(UI):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     if len(self.text) > 0 and self.editing_pos > 0:
-                        self.text = self.text[:self.editing_pos-1] + self.text[self.editing_pos:]
+                        self.text = util.string_cut(self.text, (self.editing_pos-1, self.editing_pos))
                         self.editing_pos = max(0, self.editing_pos - 1)
+                        self.timertask.reset()
+                        
                 elif event.key == pygame.K_DELETE:
-                    self.text = self.text[:self.editing_pos] + self.text[self.editing_pos+1:]
+                    self.text = util.string_cut(self.text, (self.editing_pos, self.editing_pos+1))
+                    
                 elif event.key == pygame.K_LEFT:
                     self.editing_pos = max(0, self.editing_pos - 1)
                 elif event.key == pygame.K_RIGHT:
@@ -358,7 +345,7 @@ class InputField(UI):
                         len(self.text), self.editing_pos + 1
                     )
                 elif event.key == 13:
-                    self.text = self.text[:self.editing_pos] + '\n' + self.text[self.editing_pos:]
+                    self.text = util.string_insert(self.text, NEWLINE, self.editing_pos)
                     self.editing_pos += 1
                 elif event.key == pygame.K_KP_ENTER:
                     self.focused = False
@@ -367,13 +354,13 @@ class InputField(UI):
                 self.text_edit = True
                 self.text_editing = event.text
                 self.text_editing_pos = event.start
-                self._last_update = pygame.time.get_ticks()
+                self.timertask.reset()
             elif event.type == pygame.TEXTINPUT:
                 self.text_edit = False
                 self.text_editing = ""
-                self.text = self.text[:self.editing_pos] + event.text + self.text[self.editing_pos:]
+                self.text = util.string_insert(self.text, event.text, self.editing_pos)
                 self.editing_pos += len(event.text)
-                self._last_update = pygame.time.get_ticks()
+                self.timertask.reset()
 
     def render(self, surface, camera):
         self.image.render(surface, camera)

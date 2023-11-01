@@ -1,58 +1,60 @@
+import inspect
 import pygame_phyics.util as _util
+from pygame_phyics.vector import Vector
 from typing import List
 from pygame_phyics.object import *
 from pygame_phyics.manger import Manger
-import inspect
 class Camera:
-    def __init__(self):
-        self.__x = 0
-        self.__y = 0
-        self._index = 0
-        self._len = 2
+    def __init__(self, x, y, angle):
+        self.vector = Vector(x, y)
+        self.__angle = angle
+    # rect pass rotate 
+    @property
+    def angle(self):
+        return self.__angle
+    
+    @angle.setter
+    def angle(self, value):
+        self.__angle = value if value < 360 else 360 - value
+
+    @_util.getter
+    def x(self):
+        return self.vector.x
+    
+    @_util.getter
+    def y(self):
+        return self.vector.y
     
     def __call__(self, position):
-        x = position[0] - self.x
-        y = position[1] - self.y
-        return x, y
+        rotated = self.vector.rotate_vector(Vector(*position), self.angle)
+        camerad = rotated - self.vector
+        return camerad.xy
     
     def __getitem__(self, index):
-        return (self.x, self.y)[index]
+        match index:
+            case 0:
+                return self.x
+            case 1:
+                return self.y
 
     def __iter__(self):
-        return iter((self.x, self.y))
+        return self
     
     def __next__(self):
-        next((self.x, self.y))
-    
-    @property
-    def x(self):
-        return self.__x
-    
-    @x.getter
-    def x(self):
-        return self.__x
+        if self.index < 2:
+            item = self[self.index]
+            self.index += 1
+            return item
+        else:
+            self.index = 0
+            raise StopIteration
 
-    @x.setter
-    def x(self, value):
-        self.__x = value
-    
-    @property
-    def y(self):
-        return self.__y
-    
-    @y.getter
-    def y(self):
-        return self.__y
-    
-    @y.setter
-    def y(self, value):
-        self.__y = value
 
 class Scene:
     """새계임 여기로 오브젝트가 등록되고 공통함수를 실행함"""
     
     def __init__(self):
-        self.camera = Camera()
+        self.camera = Camera(0, 0, 0)
         self.layers = [[],[],[],[],[],[],[],[]]
     
     def layer_loop(self, method, *args, **kwargs):
@@ -107,7 +109,7 @@ class Scene:
         try:
             self.layers[obj.layer].remove(obj)
         except ValueError:
-            print('value error')
+            raise ValueError("이미 삭제 되었거나 다른 레이어 계층에 있는것 같습니다")
             
     def clear(self):
         """모든 오브젝트를 새계에서 삭제하고 오브젝트 객체도 삭제됨 (delete 함수 실행)"""
@@ -166,10 +168,11 @@ class Scene:
         json : dict = _util.jsopen(path)
         setting : dict = json['setting']
         
-        if setting.get('camera'):
+        if setting.get('camera') != None:
             self.camera.x = setting['camera'][0]
             self.camera.y = setting['camera'][1]
-        setting.pop('camera')
+            self.camera.angle = setting['camera'][2]
+            setting.pop('camera')
         for key, value in setting.items():
             setattr(Manger, key, value)
         
@@ -177,10 +180,14 @@ class Scene:
         for name in objs.keys():
             for json_object in objs[name]:
                 args = list(json_object.values())
+                parameters = list(json_object.keys())
                 prefab_class = Manger.classes.get(name)
                 if prefab_class == None:
                     prefab_class = globals()[name]
                     if prefab_class == None:
                         raise ImportError(f"{name} 클레스가 존재하지 않거나 불러지지 않았습니다. \n 현재 불러온 클래스 {Manger.classes}")
-                prefab = prefab_class(*args)
-                GameObject.instantiate(prefab)
+                if list(inspect.signature(prefab_class).parameters.keys()) == parameters:
+                    prefab = prefab_class(*args)
+                    GameObject.instantiate(prefab)
+                elif len(list(inspect.signature(prefab_class).parameters.keys())) == len(parameters):
+                    raise ValueError(f"리스트에 길이는 같으나 이름이 틀리거나 순서가 다른것같습니다.\njson :{parameters}\nclass:{list(inspect.signature(prefab_class).parameters.keys())}")

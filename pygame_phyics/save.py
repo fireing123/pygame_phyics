@@ -4,7 +4,7 @@ from pygame_phyics.util import jsave
 from pygame_phyics.manger import Manger
 
 def save(layers, export_path, **kwargs):
-    kwargs['camera'] = [Manger.scene.camera.x, Manger.scene.camera.y]
+    kwargs['camera'] = list(Manger.scene.camera.vector.xy)
     saved_dict = {
         'setting':kwargs,
         'objs':{
@@ -18,7 +18,9 @@ def save(layers, export_path, **kwargs):
             prargs = {}
             parameters = list(inspect.signature(obj.__class__).parameters.keys())
             for parameter in parameters:
-                value = getattr(obj, parameter)
+                value = getattr(obj, parameter, None)
+                if value == None:
+                    raise ValueError(f"{obj.__class__.__name__}는 {parameter} 속성이 존재하지 않습니다")
                 if hasattr(value, "isiter"):
                     prargs[parameter] = list(value)
                 elif isinstance(value, pygame.rect.Rect):

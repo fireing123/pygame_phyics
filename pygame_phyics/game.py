@@ -122,10 +122,6 @@ class Game:
                         
             mouse_event()
             
-            Manger.scene.update()
-            
-            Manger.scene.on_collision_enter()
-            
             for key, value in Input.key_board.items():
                 if value == 2:
                     Input.key_board[key] = 3
@@ -143,6 +139,10 @@ class Game:
                 event_event.invoke(event)
                 
                 events(cls, event)
+
+            Manger.scene.update()
+            
+            Manger.scene.on_collision_enter()
 
             Manger.world.Step(
                 cls.time_step,
