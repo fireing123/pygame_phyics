@@ -8,7 +8,7 @@ class Input:
     def get_key(cls, key_code):
         """입력을 받는지 확인함니다"""
         
-        if cls.key_board.get(key_code) <= 2:
+        if cls.key_board.get(key_code, 0) <= 2:
             return True
         return False
     
@@ -16,7 +16,7 @@ class Input:
     def get_key_down(cls, key_code):
         """이 키가 눌리는 순간인지 확인합니다"""
         
-        if cls.key_board.get(key_code) == 2:
+        if cls.key_board.get(key_code, 0) == 2:
             return True
         return False
     
@@ -24,7 +24,7 @@ class Input:
     def get_key_up(cls, key_code):
         """이 키가 더이상 입력을 받지 않는지 확인합니다"""
         
-        if cls.key_board.get(key_code) == 1:
+        if cls.key_board.get(key_code, 0) == 1:
             return True
         return False
     
