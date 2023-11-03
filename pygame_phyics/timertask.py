@@ -34,3 +34,8 @@ class OnceTimerTask(TimerTask):
             self.once = True
             return True
         return False
+    
+    def reset(self):
+        super().reset()
+        self.once = False
+    

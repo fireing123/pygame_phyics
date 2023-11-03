@@ -3,12 +3,15 @@ class Input:
     key_board = {}
     
     mouse_click = [0, 0, 0]
-    
+    KEYUPING = 0
+    KEYUP = 1
+    KEYDOWN = 2
+    KEYDOWNING = 3
     @classmethod
     def get_key(cls, key_code):
         """입력을 받는지 확인함니다"""
         
-        if cls.key_board.get(key_code, 0) <= 2:
+        if cls.key_board.get(key_code, cls.KEYUPING) >= cls.KEYDOWN:
             return True
         return False
     
@@ -16,7 +19,7 @@ class Input:
     def get_key_down(cls, key_code):
         """이 키가 눌리는 순간인지 확인합니다"""
         
-        if cls.key_board.get(key_code, 0) == 2:
+        if cls.key_board.get(key_code, cls.KEYUPING) == cls.KEYDOWN:
             return True
         return False
     
@@ -24,7 +27,7 @@ class Input:
     def get_key_up(cls, key_code):
         """이 키가 더이상 입력을 받지 않는지 확인합니다"""
         
-        if cls.key_board.get(key_code, 0) == 1:
+        if cls.key_board.get(key_code, cls.KEYUPING) == cls.KEYUP:
             return True
         return False
     

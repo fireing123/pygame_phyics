@@ -276,7 +276,7 @@ class Button(UI):
     def render(self, surface, camera):
         self.image.render(surface, camera)
     
-   
+
 class InputField(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, scale, color, font, interval, rect):
         super().__init__(name, tag, visible, layer, position, angle)
@@ -298,8 +298,8 @@ class InputField(UI):
         self.backspace = False
         self.stay = False
         self.timertask = TimerTask(600, self.toggle_bar)
-        self.backtime = TimerTask(200, lambda :self.focus_cut(1))
-        self.wait_backspace = OnceTimerTask(1200, self.toggle_backspace)
+        self.backtime = TimerTask(40, lambda :self.focus_cut(1))
+        self.wait_backspace = OnceTimerTask(350, self.toggle_backspace)
         
         self.input_event = Event()
         game.event_event.add_lisner(self.inputfield_event)
@@ -352,36 +352,40 @@ class InputField(UI):
         self.stay = False
     
     def update(self):
-        if Input.get_key_down(pygame.K_BACKSPACE):
-            if len(self.text) > 0 and self.editing_pos > 0:
-                self.focus_cut(1)
+        if self.focused:
+            if Input.get_key_down(pygame.K_BACKSPACE):
                 self.wait_backspace.reset()
-                self.bar_reset()            
-                   
-        elif Input.get_key_down(pygame.K_DELETE):
-            self.cut((self.editing_pos, self.editing_pos+1))
-            
-        elif Input.get_key_down(pygame.K_LEFT):
-            self.set_edit_pos(1, sub=True)
-            self.bar_reset()  
-            
-        elif Input.get_key_down(pygame.K_RIGHT):
-            self.set_edit_pos(1, add=True)
-            self.bar_reset()  
+                if len(self.text) > 0 and self.editing_pos > 0:
+                    self.focus_cut(1)
+                    self.bar_reset()   
 
-        elif Input.get_key_down(13):
-            self.focus_insert(NEWLINE)
-            
-        elif Input.get_key_down(pygame.K_KP_ENTER):
-            self.focused = False
-            self.input_event.invoke(self.text)
-            
-        elif Input.get_key(pygame.K_BACKSPACE):
-            self.wait_backspace.run_periodic_task()
-            
-        elif Input.get_key_up(pygame.K_BACKSPACE):
-            self.backspace = False
-        
+            elif Input.get_key_down(pygame.K_DELETE):
+                self.cut((self.editing_pos, self.editing_pos+1))
+
+            elif Input.get_key_down(pygame.K_LEFT):
+                self.set_edit_pos(1, sub=True)
+                self.bar_reset()  
+
+            elif Input.get_key_down(pygame.K_RIGHT):
+                self.set_edit_pos(1, add=True)
+                self.bar_reset()  
+
+            elif Input.get_key_down(13):
+                self.focus_insert(NEWLINE)
+
+            elif Input.get_key_down(pygame.K_KP_ENTER):
+                self.focused = False
+                self.input_event.invoke(self.text)
+
+            elif Input.get_key(pygame.K_BACKSPACE):
+                self.wait_backspace.run_periodic_task()
+
+            elif Input.get_key_up(pygame.K_BACKSPACE):
+                self.backspace = False
+
+            if self.backspace:
+                self.backtime.run_periodic_task()
+
         self.rect = self.image.rect
         self.image.update()
         
@@ -417,6 +421,7 @@ class InputField(UI):
         self.field.render(surface, camera)
         if self.focused:
             self.input_line.render(surface, camera)
+
 class TileMap(GameObject):
     def __init__(self, name: str, tag, visible, layer, tiles, data):
         super().__init__(name, tag, visible, layer)
