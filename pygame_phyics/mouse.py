@@ -5,7 +5,13 @@ from pygame_phyics.manger import Manger
 from pygame.mouse import *
 
 def mouse_event():
-    """rect 를 가진 오브젝트의 마우스 충돌을 연산함"""
+    """rect 를 가진 오브젝트의 마우스 충돌을 연산함
+
+    Raises:
+        NotImplementedError: 마우스 충돌은 가장 위 레이어 에만 호출 되어야만 한다
+        NotImplementedError: 마우스 충돌은 가장 위 레이어 에만 호출 되어야만 한다
+        NotImplementedError: 마우스 충돌은 가장 위 레이어 에만 호출 되어야만 한다
+    """
     
     try:
         for layer in Manger.scene.layers[::-1]:

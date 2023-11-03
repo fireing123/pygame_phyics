@@ -22,6 +22,7 @@ import pygame
 from pygame import display
 
 from Box2D import b2World, b2ContactListener
+from typing import Callable
 from pygame_phyics.manger import Manger
 from pygame_phyics.scene import Scene
 from pygame_phyics.mouse import mouse_event
@@ -30,7 +31,9 @@ from pygame_phyics.input import Input
 from pygame_phyics.event import Event
 import pygame_phyics.mouse as mouse
 
+
 class ContactListener(b2ContactListener):
+    """물리 새상에서 충돌 연산을 GameObject 로 꺼낼수 있게 도와줌"""
     def BeginContact(self, contact):
         fixtureA = contact.fixtureA
         fixtureB = contact.fixtureB
@@ -42,8 +45,7 @@ class ContactListener(b2ContactListener):
             b_obj.collide_enter = a_obj
 
 def world(world_path: str):
-    """
-    함수를 새상으로 등록하는 데코레이터 입니다
+    """함수를 새상으로 등록하는 데코레이터 입니다
     
     Args:
         world_path (str) : json 경로
@@ -77,33 +79,43 @@ class Game:
     
     @classmethod
     def init(cls, size : tuple[int, int], title : str):
-        """개임 초기 샛팅입니다"""
+        """게임에 초기 설정을 진행합니다
+
+        Args:
+            size (tuple[int, int]): 스크린 크기입니다
+            title (str): 프로그램에 제목입니다
+        """
         pygame.init()
         display.set_caption(title)
         Manger.init(display.set_mode(size), Scene())
     
     @classmethod
     def import_classes(cls, obj_dir : str):
-        """클래스들을 불러와 Manger 에 저장합니다"""
+        """클래스들을 불러와 Manger 에 저장합니다
+
+        Args:
+            obj_dir (str): 오브젝트 클래스에 파일를 저장한 폴더 경로
+        """
         Manger.classes.update(import_module(obj_dir))
         
     def stop(self):
         self.is_running = False
     
     @classmethod
-    def loop(cls, events, func):
-        """이벤트랑 함수를 받아 반복문 안에서 실행합니다"""
+    def loop(cls, events: Callable, func: Callable):
+        """이벤트랑 함수를 받아 반복문 안에서 실행합니다
+
+        Args:
+            events (Callable): 이벤트 떄 실행됨
+            func (Callable): 루프 돌때 실행됨
+        """
         
         pygame.key.start_text_input()
         
         while cls.is_running:
-            
             cls.clock.tick(60)
             
-                    
             func(cls)
-            
-            #collider event
             
             mouse_pressed = mouse.get_pressed()
             

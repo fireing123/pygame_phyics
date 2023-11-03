@@ -1,10 +1,14 @@
 import inspect
 import pygame_phyics.util as _util
 from pygame_phyics.vector import Vector
-from typing import List
+from typing import List, Callable
 from pygame_phyics.object import *
 from pygame_phyics.manger import Manger
 class Camera:
+    """프로그렘이 바라보는 곳
+    __call__ 로 호출헤서 반환 받은 튜플은 카메라 시선을 적용한 값이다
+    x 랑 y 는 설정할수 없고 값을 얻을수만 있습니다 수정할려면 vector 값에서 접근하십시오
+    """
     def __init__(self, x, y, angle):
         self.vector = Vector(x, y)
         self.__angle = angle
@@ -25,7 +29,15 @@ class Camera:
     def y(self):
         return self.vector.y
     
-    def __call__(self, position):
+    def __call__(self, position: tuple[int, int] | Vector):
+        """카메라 시선을 적용한 위치를 반환함
+
+        Args:
+            position (tuple[float, float] | Vector): 오브젝트에 위치
+
+        Returns:
+            tuple[float, float]: 카메라 시선이 적용된 위치
+        """
         rotated = self.vector.rotate_vector(Vector(*position), self.angle)
         camerad = rotated - self.vector
         return camerad.xy
@@ -51,13 +63,19 @@ class Camera:
 
 
 class Scene:
-    """새계임 여기로 오브젝트가 등록되고 공통함수를 실행함"""
+    """여기로 오브젝트가 등록되고 공통함수를 실행합니다
+    """
     
     def __init__(self):
         self.camera = Camera(0, 0, 0)
         self.layers = [[],[],[],[],[],[],[],[]]
     
-    def layer_loop(self, method, *args, **kwargs):
+    def layer_loop(self, method: str, *args, **kwargs):
+        """레이어를 순환하며 겍체에 method 를 실행합니다
+
+        Args:
+            method (str): 실행할 함수 이름 
+        """
         for layer in self.layers:
             for obj in layer:
                 if kwargs.get("only") == "phyics":
@@ -71,17 +89,27 @@ class Scene:
                 else:
                     func = getattr(obj, method)
                     func(*args)
+    
     def update(self):
+        """등록된 객체에 update 함수를 실행합니다
+        """
         self.layer_loop("update")
     
     def on_collision_enter(self):
+        """충돌 함수를 호출합니다
+        """
         self.layer_loop("on_collision_enter", collide=True)
         self.layer_loop("clean_collision", only="phyics")
     
-    def render(self, surface):
+    def render(self, surface: pygame.Surface):
+        """등록된 객체에 render 함수를 실행합니다
+
+        Args:
+            surface (pygame.Surface): 화면
+        """
         self.layer_loop("render", surface, self.camera)
     
-    def add(self, obj):
+    def add(self, obj: GameObject):
         """
         오브젝트를 추가함
         
@@ -103,7 +131,7 @@ class Scene:
         for obj in list:
             self.add(obj)
     
-    def remove(self, obj):
+    def remove(self, obj: GameObject):
         """오브젝트를 새계에서 삭제하지만 오브젝트 자체는 삭제되지않음"""
         
         try:
@@ -112,8 +140,8 @@ class Scene:
             raise ValueError("이미 삭제 되었거나 다른 레이어 계층에 있는것 같습니다")
             
     def clear(self):
-        """모든 오브젝트를 새계에서 삭제하고 오브젝트 객체도 삭제됨 (delete 함수 실행)"""
-        
+        """모든 오브젝트를 새계에서 삭제하고 오브젝트 객체도 삭제됨 (delete 함수 실행)
+        """
         for layer in self.layers:
             for _ in range(len(layer)):
                 layer[0].delete()
@@ -155,22 +183,21 @@ class Scene:
         pass
 
     def load(self, path: str):
-        """
-        오브젝트를 생성하고 새계에 등록합니다
+        """오브젝트를 생성하고 새계에 등록합니다
 
         Args:
-            path (str): 경로
-            class_list (list): 임포트한 클래스 리스트
+            path (str): 멥 파일에 경로 .json
 
         Raises:
             ImportError: path 경로에 json 에서 class_list 에 존재하지 않는 클래스를 불러오려 할때
+            ValueError: 매개변수와 json 에서 저장된 값에 이름이 다르면
         """
         json : dict = _util.jsopen(path)
         setting : dict = json['setting']
         
         if setting.get('camera') != None:
-            self.camera.x = setting['camera'][0]
-            self.camera.y = setting['camera'][1]
+            self.camera.vector.x = setting['camera'][0]
+            self.camera.vector.y = setting['camera'][1]
             self.camera.angle = setting['camera'][2]
             setting.pop('camera')
         for key, value in setting.items():

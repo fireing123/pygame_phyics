@@ -5,35 +5,58 @@
 
 """
 
-import math
 import pygame
-import Box2D.b2 as b2
 import Box2D
 from pygame_phyics.manger import Manger
 from pygame_phyics import PPM
 from pygame_phyics.input import Input
 from pygame_phyics.event import Event
-import pygame_phyics.util as util
 from pygame_phyics.vector import Vector
 from pygame_phyics.timertask import TimerTask, OnceTimerTask
+import pygame_phyics.util as util
 import pygame_phyics.game as game
-import math
+
 
 
 class Component:
-    def on_mouse_enter(self, pos):
+    """기본 함수만 선언해놓음"""
+    def on_mouse_enter(self, pos: tuple[int, int]):
+        """마우스가 오브젝트(rect) 안에 들어올떄 호출됨
+
+        Args:
+            pos (tuple[int, int]): 마우스 위치 (접촉한 위치)
+        """
         pass
-    def on_mouse_stay(self, pos):
+    def on_mouse_stay(self, pos: tuple[int, int]):
+        """마우스가 오브젝트(rect) 에서 들어온 상태일떄 계속 호출됨
+
+        Args:
+            pos (tuple[int, int]): 마우스 위치 (접촉한 위치)
+        """
         pass
-    def on_mouse_exit(self, pos):
+    def on_mouse_exit(self, pos: tuple[int, int]):
+        """마우스가 오브젝트(rect) 에서 들어온 상태였다가 나오면 호출됨
+
+        Args:
+            pos (tuple[int, int]): 마우스 위치 (접촉한 위치)
+        """
         pass
     def update(self):
+        """게임 루프시 한번씩 실행됩니다"""
         pass
-    def render(self, surface, camera):
+    def render(self, surface: pygame.Surface, camera):
+        """씬에서 그릴때 실행합니다
+
+        Args:
+            surface (pygame.Surface): 프로그램 화면
+            camera (Camera): 씬 카메라
+        """
         pass
     
 class ImageObject(Component):
-    """오브젝트가 아님 오브젝트에 속성으로 사용"""
+    """이미지에 위치, 각도를 관리하고 화면에 나타낸다
+    씬에서 그려지는 오브젝트가 아닙니다
+    """
     
     def __init__(self, object, image=None, position=(0, 0), angle=0, **kwargs):
         self.object = object
@@ -46,7 +69,6 @@ class ImageObject(Component):
         self.type = 'center' if kwargs.get('type') == None else kwargs['type']
     
     def update(self):
-        """이미지에 위치 각도 등을 조정함"""
         obj_self = list(zip(self.object.render_position.xy, self.position.xy))
         obj_self_ys = obj_self[1]
         
@@ -82,7 +104,7 @@ class Joint:
 class Object(Component):
     """
     새상에 등록할수있는 가장 기초적인 오브젝트
-    save 사용시 주의사항: 파라미터랑 저장용 값이랑 이름이 같아야함9
+    save 사용시 주의사항: 매개변수 이름이랑 저장용 변수 이름이랑 이름이 같아야합니다
     """
     
     def __init__(self, name, layer, tag):
@@ -91,9 +113,9 @@ class Object(Component):
         self.layer = layer
 
     def delete(self): 
-        self.name = None
-        self.tag = None
+        """씬에서 이 오브젝트를 삭제합니다"""
         Manger.scene.remove(self)
+        del self
 
     @staticmethod
     def instantiate(object):
@@ -110,6 +132,11 @@ class GameObject(Object):
     
     @util.getter
     def render_position(self):
+        """y 좌표를 반전시켜줍니다
+        pygame 은 화면에 그릴떄 y 선이 아래로 이동할수록 + 라서 
+        사용자가 햇갈릴수 있기 떄문에 멥 파일에선 우리가 사용하는 방식으로작성하고
+        그릴떄 좌표를 이것으로 사용하시면 됩니다.
+        하지만 좌표가 topleft 기준입니다"""
         return Vector(self.position.x, Manger.HEIGHT - self.position.y)
 
 
@@ -133,10 +160,16 @@ class Phyics(GameObject, Joint):
         GameObject.__init__(self, name, tag, visible, layer)
         self.collide_enter = None
     
-    def on_collision_enter(self, collision):
+    def on_collision_enter(self, collision: GameObject):
+        """물리 오브젝트가 충돌시 이 함수가 호출됩니다
+
+        Args:
+            collision (GameObject): 충돌하는 상대 오브젝트 입니다
+        """
         pass
     
     def clean_collision(self):
+        """충돌하고 상대 오브젝트 주소를 삭제해 다음 충돌을 받을수 있도록 합니다"""
         self.collide_enter = None
     
     def render(self, surface, camera):
@@ -145,6 +178,7 @@ class Phyics(GameObject, Joint):
                 fixture.shape.render(self.body, surface, camera)
     
     def delete(self):
+        """이 오브젝트를 물리 새상과 씬에서 제거합니다"""
         Manger.world.DestroyBody(self.body)
         GameObject.delete(self)
     
@@ -169,6 +203,7 @@ class Phyics(GameObject, Joint):
         self.body.angle = value / 45
 
 class StaticObject(Phyics): 
+    """정적 물리 오브젝트"""
     def __init__(self, name, tag, visible, layer,
         position, rotate, scale, shape_type, collide_visible):
         super().__init__(name, tag, visible, layer)
@@ -191,6 +226,7 @@ class StaticObject(Phyics):
     
 
 class DynamicObject(Phyics):
+    """동적 물리 오브젝트"""
     def __init__(self, name, tag, visible, layer,
         position, rotate, scale : tuple | float, shape_type, collide_visible,
         density, friction):
@@ -211,6 +247,7 @@ class DynamicObject(Phyics):
                 self.fixture = self.body.CreatePolygonFixture(vertices=scale, density=density, friction=friction)
 
 class UI(GameObject):
+    """ui 를 위한 오브젝트"""
     def __init__(self, name: str, tag, visible, layer, position, angle):
         super().__init__(name, tag, visible, layer)
         self.position : Vector = Vector(*position)
@@ -219,6 +256,7 @@ class UI(GameObject):
 NEWLINE = '\n'
 
 class Text(UI):
+    """글자를 화면에 나타냄"""
     def __init__(self, name: str, tag, visible, layer, position, angle, size, color, Font, interval):
         super().__init__(name, tag, visible, layer, position, angle)
         self.Font = Font
@@ -228,7 +266,15 @@ class Text(UI):
         self.color = color
         self.text = ""
     
-    def get_position(self, __index):
+    def get_position(self, __index: int) -> Vector:
+        """글자에 index 주소로 접근해서 position 을 0, 0 으로 할때 x,y 좌표를 반환합니디
+
+        Args:
+            __index (int): 글자 위치
+
+        Returns:
+            Vector: position 을 0, 0 으로 할때 x,y 좌표, 월드 좌표가 아닙니다
+        """
         line = self.get_line(__index)
         text = self.text[:__index].split(NEWLINE)[-1]
         x, _ = self.font.size(text)
@@ -236,7 +282,15 @@ class Text(UI):
         y *= line
         return Vector(x-5, -y)
 
-    def get_line(self, __index):
+    def get_line(self, __index: int) -> int:
+        """글자에 index 주소로 접근해서 이 글자가 어느 라인에 위치한지 찾습니다
+
+        Args:
+            __index (int): 글자위치
+
+        Returns:
+            int: 라인 번호
+        """
         text = self.text[:__index]
         line = text.count(NEWLINE)
         return line
@@ -305,30 +359,64 @@ class InputField(UI):
         game.event_event.add_lisner(self.inputfield_event)
         
     def bar_reset(self):
+        """커서에 깜빡거림에 주기를 초기화합니다
+        """
         self.timertask.reset()
         self.input_line.visible = True
         
     def toggle_bar(self):
+        """커서를 토글로 껏다킵니다
+        """
         self.input_line.visible = not self.input_line.visible
     
     def toggle_backspace(self):
+        """연속 지우기를 토글로 제어합니다
+        """
         self.backspace = not self.backspace
     
-    def insert(self, index, value):
+    def insert(self, index: int, value: str):
+        """index 위치에 value 를 삽입합니다
+
+        Args:
+            index (int): 위치
+            value (str): 삽입할 글자
+        """
         self.text = util.string_insert(self.text, value, index)
     
-    def cut(self, range):
+    def cut(self, range: tuple[int, int]):
+        """일정 범위에 글자를 잘라냅니다
+
+        Args:
+            range (tuple[int, int]): 잘라낼 범위
+        """
         self.text = util.string_cut(self.text, range)
     
-    def focus_insert(self, value):
+    def focus_insert(self, value: str):
+        """커서를 기준으로 글자를 삽입합니다
+
+        Args:
+            value (str): 삽입할 글자
+        """
         self.insert(self.editing_pos, value)
         self.set_edit_pos(len(value), add=True)
     
-    def focus_cut(self, size):
+    def focus_cut(self, size: int):
+        """커서를 기준으로 글자를 잘라냅니다
+
+        Args:
+            size (int): 커서로부터 이만큼 잘라냅니다
+        """
         self.cut((self.editing_pos-size, self.editing_pos))
         self.set_edit_pos(size, sub=True)
         
-    def set_edit_pos(self, pos, **kwargs):
+    def set_edit_pos(self, pos: int, **kwargs):
+        """커서에 위치를 변경합니다
+        add 키워드는 bool 로 True 일떄 인수로 받은 pos를 더합니다
+        sub 키워드는 bool 로 True 일떄 인수로 받은 pos를 뺍니다
+
+        Args:
+            pos (int): 커서 위치, 또는 연산할 값
+        """
         if kwargs.get("add"):
             pos += self.editing_pos
         elif kwargs.get("sub"):
@@ -404,6 +492,11 @@ class InputField(UI):
         self.input_line.update()
     
     def inputfield_event(self, event):
+        """입력 필드에 이벤트
+
+        Args:
+            event (event): pygame 에 이벤트입니다_
+        """
         if self.focused:
             if event.type == pygame.TEXTEDITING:
                 self.text_edit = True

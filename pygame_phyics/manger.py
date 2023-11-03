@@ -8,8 +8,11 @@ class Manger:
     
     @classmethod
     def init(cls, screen: pygame.Surface, none_scene):
-        """
-        스크린, 물리, 일반을 저장함
+        """게임에 정적 변수 초기 설정 함수
+
+        Args:
+            screen (pygame.Surface): 프로그램 스크린
+            none_scene (Scene): 공백인 씬
         """
         cls.screen = screen
         cls.scene = none_scene

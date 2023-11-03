@@ -1,16 +1,16 @@
-"""object을 가져오고 object 를 새계에 생성하는 모듈"""
+"""GameObject 를 Scene 에 등록하는 모듈"""
 
 import os
-import json
 import importlib.util
 import inspect
-from typing import Dict
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
+"""절대경로"""
 
-def import_module(import_dir):
-    """
-    폴더를 선회하며 가져온 클래스를 반환함
+
+def import_module(import_dir) -> list:
+    """폴더를 선회하며 가져온 클래스를 반환함
+    **주의사항 폴더 끝에 / 를 붙여야함
     
     Args:
         import_dir (str): 디랙토리 경로
@@ -26,7 +26,7 @@ def import_module(import_dir):
             class_list.update(classes)
     return class_list
 
-def import_classes(file: str, dir: str):
+def import_classes(file: str, dir: str) -> list:
     """
     모듈에서 가져온 클래스를 리스트로 반환함
     

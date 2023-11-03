@@ -3,8 +3,16 @@ import pygame
 from pygame_phyics.util import jsave
 from pygame_phyics.manger import Manger
 
-def save(layers, export_path, **kwargs):
-    kwargs['camera'] = list(Manger.scene.camera.vector.xy)
+def save(export_path: str, **kwargs):
+    """현재 맵을 저장해 export_path 경로로 저장합니다
+
+    Args:
+        export_path (str): 내보낼 경로
+
+    Raises:
+        ValueError: 저장할 겍체가 메게변수와 같은 변수가 없습니다
+    """
+    kwargs['camera'] = list(Manger.scene.camera.vector.xy + (Manger.scene.camera.angle, ))
     saved_dict = {
         'setting':kwargs,
         'objs':{
@@ -13,7 +21,7 @@ def save(layers, export_path, **kwargs):
     }
 
     objs = {}
-    for layer in layers:
+    for layer in Manger.scene.layers:
         for obj in layer:
             prargs = {}
             parameters = list(inspect.signature(obj.__class__).parameters.keys())
