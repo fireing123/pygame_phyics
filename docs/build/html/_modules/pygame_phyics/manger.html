@@ -48,13 +48,16 @@
     <span class="n">classes</span> <span class="o">=</span> <span class="p">{}</span>
     
 <div class="viewcode-block" id="Manger.init"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.manger.Manger.init">[문서]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">screen</span><span class="p">,</span> <span class="n">world</span><span class="p">,</span> <span class="n">scene</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        스크린, 물리, 일반을 저장함</span>
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">screen</span><span class="p">:</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Surface</span><span class="p">,</span> <span class="n">none_scene</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;게임에 정적 변수 초기 설정 함수</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            screen (pygame.Surface): 프로그램 스크린</span>
+<span class="sd">            none_scene (Scene): 공백인 씬</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">screen</span> <span class="p">:</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Surface</span> <span class="o">=</span> <span class="n">screen</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">world</span> <span class="p">:</span> <span class="n">Box2D</span><span class="o">.</span><span class="n">b2World</span> <span class="o">=</span> <span class="n">world</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">scene</span></div></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">screen</span> <span class="o">=</span> <span class="n">screen</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">none_scene</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">WIDTH</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">HEIGHT</span> <span class="o">=</span> <span class="n">screen</span><span class="o">.</span><span class="n">get_size</span><span class="p">()</span></div></div>
 </pre></div>
 
             <div class="clearer"></div>

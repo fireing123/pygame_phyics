@@ -68,6 +68,14 @@ pygame\_phyics.object module
    :undoc-members:
    :show-inheritance:
 
+pygame\_phyics.save module
+--------------------------
+
+.. automodule:: pygame_phyics.save
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pygame\_phyics.scene module
 ---------------------------
 
@@ -80,6 +88,14 @@ pygame\_phyics.sheet module
 ---------------------------
 
 .. automodule:: pygame_phyics.sheet
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygame\_phyics.timertask module
+-------------------------------
+
+.. automodule:: pygame_phyics.timertask
    :members:
    :undoc-members:
    :show-inheritance:

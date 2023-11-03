@@ -62,19 +62,31 @@
 <span class="kn">import</span> <span class="nn">pygame</span>
 <span class="kn">from</span> <span class="nn">pygame</span> <span class="kn">import</span> <span class="n">display</span>
 
-<span class="kn">from</span> <span class="nn">Box2D</span> <span class="kn">import</span> <span class="n">b2World</span>
+<span class="kn">from</span> <span class="nn">Box2D</span> <span class="kn">import</span> <span class="n">b2World</span><span class="p">,</span> <span class="n">b2ContactListener</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span> <span class="nn">pygame_phyics.manger</span> <span class="kn">import</span> <span class="n">Manger</span>
 <span class="kn">from</span> <span class="nn">pygame_phyics.scene</span> <span class="kn">import</span> <span class="n">Scene</span>
 <span class="kn">from</span> <span class="nn">pygame_phyics.mouse</span> <span class="kn">import</span> <span class="n">mouse_event</span>
-<span class="kn">from</span> <span class="nn">pygame_phyics.instantiate</span> <span class="kn">import</span> <span class="n">import_module</span><span class="p">,</span> <span class="n">import_classes</span>
-<span class="kn">from</span> <span class="nn">pygame_phyics.instantiate</span> <span class="kn">import</span> <span class="n">load</span> <span class="k">as</span> <span class="n">instantiate_load</span>
+<span class="kn">from</span> <span class="nn">pygame_phyics.instantiate</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">from</span> <span class="nn">pygame_phyics.input</span> <span class="kn">import</span> <span class="n">Input</span>
 <span class="kn">from</span> <span class="nn">pygame_phyics.event</span> <span class="kn">import</span> <span class="n">Event</span>
 <span class="kn">import</span> <span class="nn">pygame_phyics.mouse</span> <span class="k">as</span> <span class="nn">mouse</span>
 
-<div class="viewcode-block" id="world"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.game.world">[문서]</a><span class="k">def</span> <span class="nf">world</span><span class="p">(</span><span class="n">world_path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    함수를 새상으로 등록하는 데코레이터 입니다</span>
+
+<div class="viewcode-block" id="ContactListener"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.game.ContactListener">[문서]</a><span class="k">class</span> <span class="nc">ContactListener</span><span class="p">(</span><span class="n">b2ContactListener</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;물리 새상에서 충돌 연산을 GameObject 로 꺼낼수 있게 도와줌&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ContactListener.BeginContact"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.game.ContactListener.BeginContact">[문서]</a>    <span class="k">def</span> <span class="nf">BeginContact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contact</span><span class="p">):</span>
+        <span class="n">fixtureA</span> <span class="o">=</span> <span class="n">contact</span><span class="o">.</span><span class="n">fixtureA</span>
+        <span class="n">fixtureB</span> <span class="o">=</span> <span class="n">contact</span><span class="o">.</span><span class="n">fixtureB</span>
+        <span class="n">a_obj</span> <span class="o">=</span> <span class="n">fixtureA</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">userData</span> 
+        <span class="n">b_obj</span> <span class="o">=</span> <span class="n">fixtureB</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">userData</span>
+        <span class="k">if</span> <span class="n">a_obj</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">a_obj</span><span class="o">.</span><span class="n">collide_enter</span> <span class="o">=</span> <span class="n">b_obj</span>
+        <span class="k">if</span> <span class="n">b_obj</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">b_obj</span><span class="o">.</span><span class="n">collide_enter</span> <span class="o">=</span> <span class="n">a_obj</span></div></div>
+
+<div class="viewcode-block" id="world"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.game.world">[문서]</a><span class="k">def</span> <span class="nf">world</span><span class="p">(</span><span class="n">world_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;함수를 새상으로 등록하는 데코레이터 입니다</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        world_path (str) : json 경로</span>
@@ -83,11 +95,16 @@
         <span class="k">def</span> <span class="nf">wrapper</span><span class="p">():</span>
             <span class="n">Manger</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">darkening</span><span class="p">()</span>
             <span class="n">Manger</span><span class="o">.</span><span class="n">world</span> <span class="o">=</span> <span class="n">b2World</span><span class="p">()</span>
+            <span class="n">contact_listener</span> <span class="o">=</span> <span class="n">ContactListener</span><span class="p">()</span>
+            <span class="n">Manger</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">contactListener</span> <span class="o">=</span> <span class="n">contact_listener</span>
             <span class="n">Manger</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">Scene</span><span class="p">()</span>
-            <span class="n">instantiate_load</span><span class="p">(</span><span class="n">world_path</span><span class="p">,</span> <span class="n">Manger</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+            <span class="n">Manger</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">world_path</span><span class="p">)</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">update</span> <span class="o">=</span> <span class="n">func</span><span class="p">()</span>
+            <span class="n">start</span><span class="p">(</span><span class="n">Game</span><span class="p">)</span>
             <span class="n">Manger</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">brightening</span><span class="p">()</span>
-            <span class="n">func</span><span class="p">()</span>
+            <span class="n">Game</span><span class="o">.</span><span class="n">loop</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">update</span><span class="p">)</span>
             <span class="k">del</span> <span class="n">Manger</span><span class="o">.</span><span class="n">scene</span>
+            <span class="k">del</span> <span class="n">Manger</span><span class="o">.</span><span class="n">world</span>
         <span class="k">return</span> <span class="n">wrapper</span>
     <span class="k">return</span> <span class="n">real_world</span></div>
 
@@ -102,36 +119,44 @@
     <span class="n">pos_iters</span> <span class="o">=</span> <span class="mi">10</span>
     
 <div class="viewcode-block" id="Game.init"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.game.Game.init">[문서]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;개임 초기 샛팅입니다&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">size</span> <span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">title</span> <span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;게임에 초기 설정을 진행합니다</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            size (tuple[int, int]): 스크린 크기입니다</span>
+<span class="sd">            title (str): 프로그램에 제목입니다</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pygame</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
         <span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-        <span class="n">Manger</span><span class="o">.</span><span class="n">init</span><span class="p">(</span>
-            <span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="n">size</span><span class="p">),</span>
-            <span class="n">b2World</span><span class="p">(),</span>
-            <span class="n">Scene</span><span class="p">())</span>
-        <span class="n">Manger</span><span class="o">.</span><span class="n">classes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">import_classes</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="s1">&#39;./pygame_phyics/&#39;</span><span class="p">))</span></div>
+        <span class="n">Manger</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="n">size</span><span class="p">),</span> <span class="n">Scene</span><span class="p">())</span></div>
     
 <div class="viewcode-block" id="Game.import_classes"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.game.Game.import_classes">[문서]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">import_classes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_dir</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;클래스들을 불러와 Manger 에 저장합니다&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">import_classes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj_dir</span> <span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;클래스들을 불러와 Manger 에 저장합니다</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj_dir (str): 오브젝트 클래스에 파일를 저장한 폴더 경로</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Manger</span><span class="o">.</span><span class="n">classes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">import_module</span><span class="p">(</span><span class="n">obj_dir</span><span class="p">))</span></div>
         
+<div class="viewcode-block" id="Game.stop"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.game.Game.stop">[문서]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_running</span> <span class="o">=</span> <span class="kc">False</span></div>
+    
 <div class="viewcode-block" id="Game.loop"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.game.Game.loop">[문서]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">loop</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="p">[],</span> <span class="n">funcs</span><span class="o">=</span><span class="p">[]):</span>
-        <span class="sd">&quot;&quot;&quot;이벤트랑 함수를 받아 반복문 안에서 실행합니다&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">loop</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">events</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;이벤트랑 함수를 받아 반복문 안에서 실행합니다</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            events (Callable): 이벤트 떄 실행됨</span>
+<span class="sd">            func (Callable): 루프 돌때 실행됨</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">pygame</span><span class="o">.</span><span class="n">key</span><span class="o">.</span><span class="n">start_text_input</span><span class="p">()</span>
         
         <span class="k">while</span> <span class="bp">cls</span><span class="o">.</span><span class="n">is_running</span><span class="p">:</span>
-            
             <span class="bp">cls</span><span class="o">.</span><span class="n">clock</span><span class="o">.</span><span class="n">tick</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
             
-                    
-            <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">funcs</span><span class="p">:</span>
-                <span class="n">func</span><span class="p">()</span>
-            
-            <span class="c1">#collider event</span>
+            <span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
             
             <span class="n">mouse_pressed</span> <span class="o">=</span> <span class="n">mouse</span><span class="o">.</span><span class="n">get_pressed</span><span class="p">()</span>
             
@@ -150,8 +175,6 @@
                         
             <span class="n">mouse_event</span><span class="p">()</span>
             
-            <span class="n">Manger</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-            
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">Input</span><span class="o">.</span><span class="n">key_board</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                     <span class="n">Input</span><span class="o">.</span><span class="n">key_board</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
@@ -167,9 +190,12 @@
                     <span class="n">Input</span><span class="o">.</span><span class="n">key_board</span><span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
                     
                 <span class="n">event_event</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-                    
-                <span class="k">for</span> <span class="n">event_func</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
-                    <span class="n">event_func</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+                
+                <span class="n">events</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+
+            <span class="n">Manger</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            
+            <span class="n">Manger</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">on_collision_enter</span><span class="p">()</span>
 
             <span class="n">Manger</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">Step</span><span class="p">(</span>
                 <span class="bp">cls</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>

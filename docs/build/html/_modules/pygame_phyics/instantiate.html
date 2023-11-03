@@ -39,19 +39,19 @@
           <div class="body" role="main">
             
   <h1>pygame_phyics.instantiate의 소스 코드</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;object을 가져오고 object 를 새계에 생성하는 모듈&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;GameObject 를 Scene 에 등록하는 모듈&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">importlib.util</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
 <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<span class="sd">&quot;&quot;&quot;절대경로&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="import_module"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.instantiate.import_module">[문서]</a><span class="k">def</span> <span class="nf">import_module</span><span class="p">(</span><span class="n">import_dir</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    폴더를 선회하며 가져온 클래스를 반환함</span>
+
+<div class="viewcode-block" id="import_module"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.instantiate.import_module">[문서]</a><span class="k">def</span> <span class="nf">import_module</span><span class="p">(</span><span class="n">import_dir</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;폴더를 선회하며 가져온 클래스를 반환함</span>
+<span class="sd">    **주의사항 폴더 끝에 / 를 붙여야함</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
 <span class="sd">        import_dir (str): 디랙토리 경로</span>
@@ -67,7 +67,7 @@
             <span class="n">class_list</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">class_list</span></div>
 
-<div class="viewcode-block" id="import_classes"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.instantiate.import_classes">[문서]</a><span class="k">def</span> <span class="nf">import_classes</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">dir</span><span class="p">):</span>
+<div class="viewcode-block" id="import_classes"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.instantiate.import_classes">[문서]</a><span class="k">def</span> <span class="nf">import_classes</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    모듈에서 가져온 클래스를 리스트로 반환함</span>
 <span class="sd">    </span>
@@ -91,29 +91,6 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;모듈 </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">을(를) 임포트하는 중 오류 발생: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">class_list</span></div>
-
-<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../pygame_phyics.html#pygame_phyics.instantiate.load">[문서]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_list</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    오브젝트를 생성하고 새계에 등록합니다</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        path (str): 경로</span>
-<span class="sd">        class_list (list): 임포트한 클래스 리스트</span>
-<span class="sd">        </span>
-<span class="sd">    Raises:</span>
-<span class="sd">        ImportError: path 경로에 json 에서 class_list 에 존재하지 않는 클래스를 불러오려 할때</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">GameObject</span> <span class="o">=</span> <span class="n">class_list</span><span class="p">[</span><span class="s1">&#39;GameObject&#39;</span><span class="p">]</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">js</span> <span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">js</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">json_object</span> <span class="ow">in</span> <span class="n">js</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
-                <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">json_object</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-                <span class="n">prefab_class</span> <span class="o">=</span> <span class="n">class_list</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">prefab_class</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> 클레스가 존재하지 않거나 불러지지 않았습니다. </span><span class="se">\n</span><span class="s2"> 현재 불러온 클래스 </span><span class="si">{</span><span class="n">class_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">prefab</span> <span class="o">=</span> <span class="n">prefab_class</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-                <span class="n">GameObject</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span><span class="n">prefab</span><span class="p">)</span></div>
 </pre></div>
 
             <div class="clearer"></div>
