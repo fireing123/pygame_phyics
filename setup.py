@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pygame_phyics',
-    version='0.5.1',
+    version='0.5.2',
     author= 'fireing123',
     author_email= 'gimd82368@gmail.com',
     url= 'https://github.com/fireing123/pygame_phyics',
