@@ -524,8 +524,71 @@ class InputField(UI):
             self.input_line.render(surface, camera)
 
 class TileMap(GameObject):
-    def __init__(self, name: str, tag, visible, layer, tiles, data):
+    def __init__(self, name: str, tag, visible, layer, tiles: list[dict[int, dict[int, str]]], data: dict[str, dict[str, str]]):
         super().__init__(name, tag, visible, layer)
-
-class RectTileMap(TileMap):
-    pass
+        self.tiles = tiles
+        self.size = data['size']
+        self.canvas = [pygame.image.load(path) for path in list(data['canvas'].items())]  
+        self.str_canvas = data['canvas'].values()
+    @util.getter
+    def data(self):
+        return {
+            "size": self.size,
+            "canvas": self.str_canvas
+        }
+        
+        
+        # 저장 구현 일단 다ㅏㅏㅏㅏㅏㅏㅏㅏㅏ
+        
+    def set_tile(self, xy, value):
+        match xy:
+            case n if n[0] >= 0 and n[1] >= 0:
+                y = self.tiles[0].get(n[0])
+                if y != None:
+                    y[n[1]] = value
+                else:
+                    y = {}[n[1]] = value
+            case n if n[0] < 0 and n[1] >= 0:
+                y = self.tiles[0].get(-n[0])
+                if y != None:
+                    y[n[1]] = value
+                else:
+                    y = {}[n[1]] = value
+            case n if n[0] < 0 and n[1] < 0:
+                y = self.tiles[0].get(-n[0])
+                if y != None:
+                    y[-n[1]] = value
+                else:
+                    y = {}[n[1]] = value
+            case n if n[0] >= 0 and n[1] < 0:
+                y = self.tiles[0].get(n[0])
+                if y != None:
+                    y[n[1]] = value
+                else:
+                    y = {}[-n[1]] = value
+        
+    def get_tile(self, xy):
+        match xy:
+            case n if n[0] >= 0 and n[1] >= 0:
+                return self.tiles[0][n[0]][n[1]]
+            case n if n[0] < 0 and n[1] >= 0:
+                return self.tiles[1][-n[0]][n[1]]
+            case n if n[0] < 0 and n[1] < 0:
+                return self.tiles[2][-n[0]][-n[1]]
+            case n if n[0] >= 0 and n[1] < 0:
+                return self.tiles[3][n[0]][-n[1]]
+    
+    def get_tile_image(self, n):
+        return self.canvas[n]
+    
+    def render(self, surface, camera):
+        HALF_WIDTH = Manger.WIDTH / (self.size * 2)
+        HALF_HEIGHT = Manger.HEIGHT / (self.size * 2)
+        tile_camera = camera.vector.div_float(self.size)
+        xrange = tile_camera.x - HALF_WIDTH, tile_camera.x + HALF_WIDTH
+        yrange = tile_camera.y - HALF_HEIGHT, tile_camera.y + HALF_HEIGHT
+        for y in range(*yrange):
+            for x in range(*xrange):
+                tile_n = self.get_tile((x, y))
+                image = self.get_tile_image(tile_n)
+                surface.blit(image, camera((x * self.size, y * self.size)))
