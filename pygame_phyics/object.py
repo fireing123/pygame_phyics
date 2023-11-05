@@ -15,7 +15,7 @@ from pygame_phyics.vector import Vector
 from pygame_phyics.timertask import TimerTask, OnceTimerTask
 import pygame_phyics.util as util
 import pygame_phyics.game as game
-
+from pygame_phyics.camera import Camera
 
 
 class Component:
@@ -44,7 +44,7 @@ class Component:
     def update(self):
         """게임 루프시 한번씩 실행됩니다"""
         pass
-    def render(self, surface: pygame.Surface, camera):
+    def render(self, surface: pygame.Surface, camera: Camera):
         """씬에서 그릴때 실행합니다
 
         Args:
@@ -62,6 +62,7 @@ class ImageObject(Component):
         self.object = object
         self.visible = True
         self.og_image = pygame.image.load(image) if kwargs.get('surface') == None else pygame.Surface(kwargs['surface'], pygame.SRCALPHA)
+        self.collide = kwargs.get("collide", False)
         self.is_follow_camera = kwargs.get("follow", False)
         self.image = self.og_image
         self.rect = self.image.get_rect()
@@ -76,22 +77,25 @@ class ImageObject(Component):
         world_position = Vector(sum(obj_self[0]), obj_self_ys[0] - obj_self_ys[1])
         
         position = self.object.render_position.rotate_vector(world_position, self.object.angle)
+
+        self.rect = self.image.get_rect(**{self.type: position.xy})
         
-        if self.is_follow_camera:
-            self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle)
-        else:
-            self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle + Manger.scene.camera.angle)
-        
-        
-        self.rect = self.image.get_rect()
-        setattr(self.rect, self.type, position.xy)
+        if self.collide:
+            self.object.rect = self.rect
+        print(self.rect.topleft)
+
 
     def render(self, surface, camera):
         if self.visible:
             if self.is_follow_camera:
+                self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle)
+            else:
+                self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle + Manger.scene.camera.angle)
+            
+            if self.is_follow_camera:
                 surface.blit(self.image, self.rect.topleft)
             else:
-                surface.blit(self.image, camera(self.rect.topleft))
+                surface.blit(self.image, self.image.get_rect(center=camera(self.rect.center)))
 
 class Joint:
     """물리 연산의 연결 담당"""
@@ -317,8 +321,8 @@ class Text(UI):
 class Button(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, default, clicked):
         super().__init__(name, tag, visible, layer, position, angle)
-        self.default = ImageObject(self, default, follow=True)
-        self.clicked = ImageObject(self, clicked, follow=True)
+        self.default = ImageObject(self, default, follow=True, collide=True)
+        self.clicked = ImageObject(self, clicked, follow=True, collide=True)
         self.image = self.default
         self.rect = self.image.rect
         self.is_click = Event()
@@ -327,14 +331,11 @@ class Button(UI):
         if Input.get_mouse_down(0):
             self.is_click.invoke() 
             self.image = self.clicked
-            self.rect = self.image.rect
         elif Input.get_mouse_up(0):
             self.image = self.default
-            self.rect = self.image.rect
     
     def update(self):
         self.image.update()
-        self.rect = self.image.rect
         
     def render(self, surface, camera):
         self.image.render(surface, camera)
@@ -343,8 +344,7 @@ class Button(UI):
 class InputField(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, scale, color, font, interval, rect):
         super().__init__(name, tag, visible, layer, position, angle)
-        self.image = ImageObject(self, surface=rect, type='topleft', follow=True)
-        self.rect = self.image.rect
+        self.image = ImageObject(self, surface=rect, type='topleft', follow=True, collide=True)
         self.image.og_image.fill((0, 0, 0, 128))
         self.input_line = ImageObject(self, surface=(5, scale[1]), type="topleft", follow=True)
         self.input_line.og_image.fill((255,255,255, 255))
@@ -483,7 +483,6 @@ class InputField(UI):
             if self.backspace:
                 self.backtime.run_periodic_task()
 
-        self.rect = self.image.rect
         self.image.update()
         
         if not self.stay and Input.get_mouse_down(0):
