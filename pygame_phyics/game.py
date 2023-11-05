@@ -87,6 +87,7 @@ class Game:
         """
         pygame.init()
         display.set_caption(title)
+        pygame.key.start_text_input()
         Manger.init(display.set_mode(size), Scene())
     
     @classmethod
@@ -109,8 +110,6 @@ class Game:
             events (Callable): 이벤트 떄 실행됨
             func (Callable): 루프 돌때 실행됨
         """
-        
-        pygame.key.start_text_input()
         
         while cls.is_running:
             cls.clock.tick(60)

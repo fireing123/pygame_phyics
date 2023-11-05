@@ -62,6 +62,7 @@ class ImageObject(Component):
         self.object = object
         self.visible = True
         self.og_image = pygame.image.load(image) if kwargs.get('surface') == None else pygame.Surface(kwargs['surface'], pygame.SRCALPHA)
+        self.is_follow_camera = kwargs.get("follow", False)
         self.image = self.og_image
         self.rect = self.image.get_rect()
         self.position = Vector(*position)
@@ -76,13 +77,21 @@ class ImageObject(Component):
         
         position = self.object.render_position.rotate_vector(world_position, self.object.angle)
         
-        self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle + Manger.scene.camera.angle)
+        if self.is_follow_camera:
+            self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle)
+        else:
+            self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle + Manger.scene.camera.angle)
+        
+        
         self.rect = self.image.get_rect()
         setattr(self.rect, self.type, position.xy)
 
     def render(self, surface, camera):
         if self.visible:
-            surface.blit(self.image, camera(self.rect.topleft)) 
+            if self.is_follow_camera:
+                surface.blit(self.image, self.rect.topleft)
+            else:
+                surface.blit(self.image, camera(self.rect.topleft))
 
 class Joint:
     """물리 연산의 연결 담당"""
@@ -142,14 +151,14 @@ class GameObject(Object):
 
 def circle_render(circle, body, surface, camera):
     position = body.transform * circle.pos * PPM
-    position = (position[0] - camera[0], Manger.HEIGHT - position[1] - camera[1])
+    position = camera((position[0], Manger.HEIGHT - position[1]))
     pygame.draw.circle(surface, (127, 127, 127, 255), [int(
         x) for x in position], int(circle.radius * PPM), 1)
 Box2D.b2CircleShape.render = circle_render
 def polygon_render(polygon, body, surface, camera):
     vertices = [(body.transform * v) * PPM for v in polygon.vertices]
     vertices = [(v[0], Manger.HEIGHT - v[1]) for v in vertices]
-    vertices = [(v[0] - camera[0], v[1] - camera[1]) for v in vertices]
+    vertices = [camera(v) for v in vertices]
     pygame.draw.polygon(surface, (127, 127, 127, 255), vertices, 1)
 Box2D.b2PolygonShape.render = polygon_render
     
@@ -298,8 +307,8 @@ class Text(UI):
     def render(self, surface : pygame.Surface, camera):
         texts = self.text.split(NEWLINE)
         self.images = [self.font.render(text, True, self.color) for text in texts]
-        x, y = camera(self.render_position)
         positions = []
+        x, y = self.render_position
         for i in texts:
             positions.append((x, y))
             y += self.size + self.interval
@@ -308,8 +317,8 @@ class Text(UI):
 class Button(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, default, clicked):
         super().__init__(name, tag, visible, layer, position, angle)
-        self.default = ImageObject(self, default)
-        self.clicked = ImageObject(self, clicked)
+        self.default = ImageObject(self, default, follow=True)
+        self.clicked = ImageObject(self, clicked, follow=True)
         self.image = self.default
         self.rect = self.image.rect
         self.is_click = Event()
@@ -334,10 +343,10 @@ class Button(UI):
 class InputField(UI):
     def __init__(self, name: str, tag, visible, layer, position, angle, scale, color, font, interval, rect):
         super().__init__(name, tag, visible, layer, position, angle)
-        self.image = ImageObject(self, surface=rect, type='topleft')
+        self.image = ImageObject(self, surface=rect, type='topleft', follow=True)
         self.rect = self.image.rect
         self.image.og_image.fill((0, 0, 0, 128))
-        self.input_line = ImageObject(self, surface=(5, scale[1]), type="topleft")
+        self.input_line = ImageObject(self, surface=(5, scale[1]), type="topleft", follow=True)
         self.input_line.og_image.fill((255,255,255, 255))
         
         self.field = Text(name+"field", tag, visible, layer, position, angle, scale[1], color, font, interval)

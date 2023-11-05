@@ -38,7 +38,7 @@ class Camera:
         Returns:
             tuple[float, float]: 카메라 시선이 적용된 위치
         """
-        rotated = self.vector.rotate_vector(Vector(*position), self.angle)
+        rotated = Vector(Manger.WIDTH/2, Manger.HEIGHT/2).rotate_vector(Vector(*position), self.angle)
         camerad = rotated - self.vector
         return camerad.xy
     
