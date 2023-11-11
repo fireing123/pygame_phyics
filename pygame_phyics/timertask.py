@@ -22,7 +22,6 @@ class TimerTask:
         """
         self.tick = tick
         self.last_update = 0
-        print(type(event), inspect.ismethod(event))
         if inspect.ismethod(event) and inspect.isfunction(event):
             raise FunctionError(f"입력받은 값은 는 함수가 아닙니다")
         self.event = event

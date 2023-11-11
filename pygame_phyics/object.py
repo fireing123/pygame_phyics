@@ -82,7 +82,6 @@ class ImageObject(Component):
         
         if self.collide:
             self.object.rect = self.rect
-        print(self.rect.topleft)
 
 
     def render(self, surface, camera):
@@ -524,12 +523,13 @@ class InputField(UI):
             self.input_line.render(surface, camera)
 
 class TileMap(GameObject):
-    def __init__(self, name: str, tag, visible, layer, tiles: list[dict[int, dict[int, str]]], data: dict[str, dict[str, str]]):
+    def __init__(self, name: str, tag, visible, layer, tiles: list[dict[int, dict[int, str]]], data: dict[str, dict]):
         super().__init__(name, tag, visible, layer)
         self.tiles = tiles
         self.size = data['size']
-        self.canvas = [pygame.image.load(path) for path in list(data['canvas'].items())]  
+        self.canvas = {key: pygame.image.load(path) for key, path in data['canvas'].items()}
         self.str_canvas = data['canvas'].values()
+        
     @util.getter
     def data(self):
         return {
@@ -543,40 +543,40 @@ class TileMap(GameObject):
     def set_tile(self, xy, value):
         match xy:
             case n if n[0] >= 0 and n[1] >= 0:
-                y = self.tiles[0].get(n[0])
+                y = self.tiles[0].get(n[1])
                 if y != None:
-                    y[n[1]] = value
+                    y[str(n[0])] = value
                 else:
-                    y = {}[n[1]] = value
+                    y = {}[str(n[0])] = value
             case n if n[0] < 0 and n[1] >= 0:
-                y = self.tiles[0].get(-n[0])
+                y = self.tiles[0].get(n[1])
                 if y != None:
-                    y[n[1]] = value
+                    y[str(-n[0])] = value
                 else:
-                    y = {}[n[1]] = value
+                    y = {}[str(-n[0])] = value
             case n if n[0] < 0 and n[1] < 0:
-                y = self.tiles[0].get(-n[0])
+                y = self.tiles[0].get(-n[1])
                 if y != None:
-                    y[-n[1]] = value
+                    y[str(-n[0])] = value
                 else:
-                    y = {}[n[1]] = value
+                    y = {}[str(n[0])] = value
             case n if n[0] >= 0 and n[1] < 0:
-                y = self.tiles[0].get(n[0])
+                y = self.tiles[0].get(-n[1])
                 if y != None:
-                    y[n[1]] = value
+                    y[str(n[0])] = value
                 else:
-                    y = {}[-n[1]] = value
+                    y = {}[str(n[0])] = value
         
     def get_tile(self, xy):
         match xy:
             case n if n[0] >= 0 and n[1] >= 0:
-                return self.tiles[0][n[0]][n[1]]
+                return self.tiles[0].get(str(n[1]), {}).get(str(n[0]))
             case n if n[0] < 0 and n[1] >= 0:
-                return self.tiles[1][-n[0]][n[1]]
+                return self.tiles[1].get(str(n[1]), {}).get(str(-n[0]))
             case n if n[0] < 0 and n[1] < 0:
-                return self.tiles[2][-n[0]][-n[1]]
+                return self.tiles[2].get(str(-n[1]), {}).get(str(-n[0]))
             case n if n[0] >= 0 and n[1] < 0:
-                return self.tiles[3][n[0]][-n[1]]
+                return self.tiles[3].get(str(-n[1]), {}).get(str(n[0]))
     
     def get_tile_image(self, n):
         return self.canvas[n]
@@ -585,10 +585,13 @@ class TileMap(GameObject):
         HALF_WIDTH = Manger.WIDTH / (self.size * 2)
         HALF_HEIGHT = Manger.HEIGHT / (self.size * 2)
         tile_camera = camera.vector.div_float(self.size)
-        xrange = tile_camera.x - HALF_WIDTH, tile_camera.x + HALF_WIDTH
-        yrange = tile_camera.y - HALF_HEIGHT, tile_camera.y + HALF_HEIGHT
+        xrange = int(tile_camera.x - HALF_WIDTH), int(tile_camera.x + HALF_WIDTH) + 1
+        yrange = int(tile_camera.y - HALF_HEIGHT), int(tile_camera.y + HALF_HEIGHT) + 1
         for y in range(*yrange):
             for x in range(*xrange):
                 tile_n = self.get_tile((x, y))
-                image = self.get_tile_image(tile_n)
-                surface.blit(image, camera((x * self.size, y * self.size)))
+                if tile_n != None:
+                    image = self.get_tile_image(tile_n)
+                    cx = (HALF_WIDTH + x) * self.size - camera.x
+                    cy = (HALF_HEIGHT - y) * self.size + camera.y
+                    surface.blit(image, (cx, cy))
