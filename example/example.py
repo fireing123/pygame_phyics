@@ -8,9 +8,9 @@ from pygame_phyics.object import InputField
 
 Game.init((1000, 800), "MyGame")
 
-Game.import_classes("example/objects/")
+Game.import_classes("objects/")
 
-@game.world("example/example.json")
+@game.world("example.json")
 def example():
     text = Manger.scene.get_objects("eello")[0]
     inputfield : InputField = Manger.scene.get_objects("eeldlo")[0]

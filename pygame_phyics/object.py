@@ -537,9 +537,6 @@ class TileMap(GameObject):
             "canvas": self.str_canvas
         }
         
-        
-        # 저장 구현 일단 다ㅏㅏㅏㅏㅏㅏㅏㅏㅏ
-        
     def set_tile(self, xy, value):
         match xy:
             case n if n[0] >= 0 and n[1] >= 0:
