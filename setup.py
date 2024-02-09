@@ -6,6 +6,6 @@ setup(
     author= 'fireing123',
     author_email= 'gimd82368@gmail.com',
     url= 'https://github.com/fireing123/pygame_phyics',
-    install_requires=["pygame", "box2d"],
+    install_requires=["pygame", "Box2D"],
     packages=find_packages(),
 )
