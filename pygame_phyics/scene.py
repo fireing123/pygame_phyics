@@ -1,7 +1,10 @@
 import inspect
+
+import pygame
+from pygame_phyics.camera import Camera
 import pygame_phyics.util as _util
 from typing import List
-from pygame_phyics.object import *
+from pygame_phyics.objects import *
 from pygame_phyics.manger import Manger
 
 
@@ -22,7 +25,7 @@ class Scene:
         for layer in self.layers:
             for obj in layer:
                 if kwargs.get("only") == "phyics":
-                    if isinstance(obj, Phyics):
+                    if isinstance(obj, Physics):
                         func = getattr(obj, method)
                         func(*args)
                 elif kwargs.get('collide'):

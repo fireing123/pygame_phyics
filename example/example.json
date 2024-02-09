@@ -59,7 +59,7 @@
             }
         ],
         "Text": [
-            {"name": "eello","tag": "ta","visible": true,"layer": 3,"position": [0.0, 500.0],"angle": 0,"size": 50,"color":[255, 255, 255],"Font":"./Galmuri11.ttf","interval" : 10}
+            {"name": "eello","tag": "ta","visible": true,"layer": 3,"position": [0.0, 100.0],"angle": 0,"size": 50,"color":[255, 255, 255],"Font":"./Galmuri11.ttf","interval" : 10}
         ],
         "InputField": [
             {"name": "eeldlo","tag": "ta","visible": true,"layer": 3,"position": [400.0, 100.0],"angle": 0,"scale": [50, 50],"color": [255, 255, 255],"font": "./Galmuri11.ttf","interval":-10,"rect": [640, 80]}

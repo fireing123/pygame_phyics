@@ -29,10 +29,8 @@ class TimerTask:
         self.kwargs = kwargs
         
     def run_periodic_task(self):
-        """주기적으로 실행해주기 위해선 이함수를 실행해야한다
-        원리가 조건이 맞으면 실행되는거라 이 함수에 실행 개수가 아닙니다
-        이 함수는 반복실행되는 곳에서 사용하는게 적합합니다
-        update, event, render 같은 곳이 예시입니다
+        """요구 시간이 지났는지 확인하는 함수
+        확인될시 True 를 반환한다
 
         Returns:
             _type_: _description_

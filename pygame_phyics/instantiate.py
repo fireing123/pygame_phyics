@@ -21,9 +21,11 @@ def import_module(import_dir) -> list:
     """
     class_list = {}
     for file in os.listdir(import_dir):
-        if file.endswith(".py") and file != '__init__.py':
+        if file.endswith(".py") and file != '__init__.py' and os.path.isfile(file):
             classes = import_classes(file[:-3], import_dir)
             class_list.update(classes)
+        elif os.path.isdir(file):
+            class_list += import_module(import_dir + file + "/")
     return class_list
 
 def import_classes(file: str, dir: str) -> list:

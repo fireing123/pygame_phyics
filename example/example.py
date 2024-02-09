@@ -4,11 +4,11 @@ from pygame_phyics import Game
 from pygame_phyics.vector import Vector
 from pygame_phyics import Manger
 from pygame_phyics import DynamicObject
-from pygame_phyics.object import InputField
+from pygame_phyics.objects import InputField
 
 Game.init((1000, 800), "MyGame")
 
-Game.import_classes("objects/")
+Game.import_objects("objects/")
 
 @game.world("example.json")
 def example():

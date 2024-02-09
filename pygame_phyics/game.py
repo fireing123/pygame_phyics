@@ -91,16 +91,17 @@ class Game:
         Manger.init(display.set_mode(size), Scene())
     
     @classmethod
-    def import_classes(cls, obj_dir : str):
+    def import_objects(cls, obj_dir : str):
         """클래스들을 불러와 Manger 에 저장합니다
 
         Args:
             obj_dir (str): 오브젝트 클래스에 파일를 저장한 폴더 경로
         """
         Manger.classes.update(import_module(obj_dir))
-        
-    def stop(self):
-        self.is_running = False
+    
+    @classmethod
+    def stop(cls):
+        cls.is_running = False
     
     @classmethod
     def loop(cls, events: Callable, func: Callable):
