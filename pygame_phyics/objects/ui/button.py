@@ -1,4 +1,4 @@
-from build.lib.pygame_phyics.object import UI
+from pygame_phyics.objects.ui.ui import UI
 from pygame_phyics.event import Event
 from pygame_phyics.input import Input
 from pygame_phyics.objects.image import ImageObject
