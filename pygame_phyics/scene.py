@@ -7,6 +7,9 @@ from typing import List
 from pygame_phyics.objects import *
 from pygame_phyics.manger import Manger
 
+def change_dict(args: dict):
+    new_args = [change_dict(arg) if key=='supe' else arg for key, arg in args.items()]
+    return new_args
 
 class Scene:
     """여기로 오브젝트가 등록되고 공통함수를 실행합니다
@@ -40,6 +43,9 @@ class Scene:
         """등록된 객체에 update 함수를 실행합니다
         """
         self.layer_loop("update")
+    
+    def set_parent(self):
+        self.layer_loop("set_parent")
     
     def on_collision_enter(self):
         """충돌 함수를 호출합니다
@@ -152,7 +158,7 @@ class Scene:
         objs = json['objs']
         for name in objs.keys():
             for json_object in objs[name]:
-                args = list(json_object.values())
+                args = change_dict(json_object)
                 parameters = list(json_object.keys())
                 prefab_class = Manger.classes.get(name)
                 if prefab_class == None:
@@ -161,6 +167,7 @@ class Scene:
                         raise ImportError(f"{name} 클레스가 존재하지 않거나 불러지지 않았습니다. \n 현재 불러온 클래스 {Manger.classes}")
                 if list(inspect.signature(prefab_class).parameters.keys()) == parameters:
                     prefab = prefab_class(*args)
-                    GameObject.instantiate(prefab)
+                    prefab.instantiate()
                 elif len(list(inspect.signature(prefab_class).parameters.keys())) == len(parameters):
                     raise ValueError(f"리스트에 길이는 같으나 이름이 틀리거나 순서가 다른것같습니다.\njson :{parameters}\nclass:{list(inspect.signature(prefab_class).parameters.keys())}")
+        self.set_parent()

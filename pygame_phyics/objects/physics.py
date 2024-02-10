@@ -1,6 +1,7 @@
 import pygame
 import Box2D
 from pygame_phyics import PPM
+from pygame_phyics.location import Location, PhysicsLocation
 from pygame_phyics.manger import Manger
 from pygame_phyics.objects.gameobject import GameObject
 from pygame_phyics.objects.joint import Joint
@@ -10,9 +11,10 @@ from pygame_phyics.vector import Vector
 class Physics(GameObject, Joint):
     """물리오브젝트에 공통점"""
     
-    def __init__(self, name: str, tag, visible, layer):
-        GameObject.__init__(self, name, tag, visible, layer)
+    def __init__(self, supe):
+        GameObject.__init__(self, *supe)
         self.collide_enter = None
+        self.location.world_position
     
     def on_collision_enter(self, collision: GameObject):
         """물리 오브젝트가 충돌시 이 함수가 호출됩니다
@@ -35,26 +37,6 @@ class Physics(GameObject, Joint):
         """이 오브젝트를 물리 새상과 씬에서 제거합니다"""
         Manger.world.DestroyBody(self.body)
         GameObject.delete(self)
-    
-    
-    @property
-    def position(self):
-        pos = self.body.transform.position * PPM
-        return Vector(pos.x, pos.y)
-
-    
-    @position.setter
-    def position(self, value: Vector): # value 는 x, y 를 가지는 vector 로
-        self.body.transform.position.x = value.x / PPM
-        self.body.transform.position.y = value.y / PPM
-        
-    @property
-    def angle(self):
-        return self.body.angle * 45
-
-    @angle.setter
-    def angle(self, value):
-        self.body.angle = value / 45
         
         
 def circle_render(circle, body, surface, camera):
@@ -72,9 +54,8 @@ Box2D.b2PolygonShape.render = polygon_render
 
 class StaticObject(Physics): 
     """정적 물리 오브젝트"""
-    def __init__(self, name, tag, visible, layer,
-        position, rotate, scale, shape_type, collide_visible):
-        super().__init__(name, tag, visible, layer)
+    def __init__(self, supe, scale, shape_type, collide_visible):
+        super().__init__(*supe)
         self.collide_visible = collide_visible
         match shape_type:
             case "chain":
@@ -89,21 +70,16 @@ class StaticObject(Physics):
             shapes=self.shape
             )
         self.body.userData = self
-        self.position = Vector(*position)
-        self.angle = rotate
-    
+
 
 class DynamicObject(Physics):
     """동적 물리 오브젝트"""
-    def __init__(self, name, tag, visible, layer,
-        position, rotate, scale : tuple | float, shape_type, collide_visible,
+    def __init__(self, supe, scale : tuple | float, shape_type, collide_visible,
         density, friction):
-        super().__init__(name, tag, visible, layer)
+        super().__init__(*supe)
         self.collide_visible = collide_visible
         self.body : Box2D.b2Body = Manger.world.CreateDynamicBody()
         self.body.userData = self
-        self.position = Vector(*position)
-        self.angle = rotate
         match shape_type:
             case "chain":
                 self.shape = self.body.CreateChainFixture(vertices_chain=scale, density=density, friction=friction)

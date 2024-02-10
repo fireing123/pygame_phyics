@@ -6,8 +6,8 @@ from pygame_phyics.vector import Vector
 
 class Text(UI):
     """글자를 화면에 나타냄"""
-    def __init__(self, name: str, tag, visible, layer, position, angle, size, color, Font, interval):
-        super().__init__(name, tag, visible, layer, position, angle)
+    def __init__(self, supe, size, color, Font, interval):
+        super().__init__(*supe)
         self.Font = Font
         self.font = pygame.font.Font(Font, size)
         self.size = size

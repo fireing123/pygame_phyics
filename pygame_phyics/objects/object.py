@@ -18,6 +18,5 @@ class Object(Component):
         Manger.scene.remove(self)
         del self
 
-    @staticmethod
-    def instantiate(object):
-        Manger.scene.add(object)
+    def instantiate(self):
+        Manger.scene.add(self)

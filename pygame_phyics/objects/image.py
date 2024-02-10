@@ -26,7 +26,7 @@ class ImageObject(Component):
         
         world_position = Vector(sum(obj_self[0]), obj_self_ys[0] - obj_self_ys[1])
         
-        position = self.object.render_position.rotate_vector(world_position, self.object.angle)
+        position = self.object.render_position.rotate_vector(world_position, self.object.location.rotation)
 
         self.rect = self.image.get_rect(**{self.type: position.xy})
         
@@ -37,9 +37,9 @@ class ImageObject(Component):
     def render(self, surface, camera):
         if self.visible:
             if self.is_follow_camera:
-                self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle)
+                self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.location.rotation)
             else:
-                self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.angle + Manger.scene.camera.angle)
+                self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.location.rotation + Manger.scene.camera.angle)
             
             if self.is_follow_camera:
                 surface.blit(self.image, self.rect.topleft)
