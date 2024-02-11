@@ -14,7 +14,15 @@ class Physics(GameObject, Joint):
     def __init__(self, supe):
         GameObject.__init__(self, *supe)
         self.collide_enter = None
-        self.location.world_position
+        self.bpos = self.location.position
+        self.brot = self.location.rotation
+        self.location = PhysicsLocation(self)
+        
+    def set_location(self):
+        self.location.position = self.bpos
+        self.location.rotation = self.brot
+        del self.bpos
+        del self.brot
     
     def on_collision_enter(self, collision: GameObject):
         """물리 오브젝트가 충돌시 이 함수가 호출됩니다

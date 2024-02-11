@@ -8,7 +8,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 """절대경로"""
 
 
-def import_module(import_dir) -> list:
+def import_module(import_dir):
     """폴더를 선회하며 가져온 클래스를 반환함
     **주의사항 폴더 끝에 / 를 붙여야함
     
@@ -21,14 +21,14 @@ def import_module(import_dir) -> list:
     """
     class_list = {}
     for file in os.listdir(import_dir):
-        if file.endswith(".py") and file != '__init__.py' and os.path.isfile(file):
+        if file.endswith(".py") and file != '__init__.py':
             classes = import_classes(file[:-3], import_dir)
             class_list.update(classes)
         elif os.path.isdir(file):
             class_list += import_module(import_dir + file + "/")
     return class_list
 
-def import_classes(file: str, dir: str) -> list:
+def import_classes(file: str, dir: str) -> dict:
     """
     모듈에서 가져온 클래스를 리스트로 반환함
     

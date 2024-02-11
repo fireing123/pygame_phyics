@@ -53,6 +53,9 @@ class Scene:
         self.layer_loop("on_collision_enter", collide=True)
         self.layer_loop("clean_collision", only="phyics")
     
+    def set_physics_location(self): 
+        self.layer_loop("set_location", only='phyics')
+    
     def render(self, surface: pygame.Surface):
         """등록된 객체에 render 함수를 실행합니다
 
@@ -171,3 +174,5 @@ class Scene:
                 elif len(list(inspect.signature(prefab_class).parameters.keys())) == len(parameters):
                     raise ValueError(f"리스트에 길이는 같으나 이름이 틀리거나 순서가 다른것같습니다.\njson :{parameters}\nclass:{list(inspect.signature(prefab_class).parameters.keys())}")
         self.set_parent()
+        
+        self.set_physics_location()

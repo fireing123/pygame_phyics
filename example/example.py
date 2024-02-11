@@ -8,7 +8,7 @@ from pygame_phyics.objects import InputField
 
 Game.init((1000, 800), "MyGame")
 
-Game.import_objects("objects/")
+#Game.import_objects("objects/")
 
 @game.world("example.json")
 def example():
