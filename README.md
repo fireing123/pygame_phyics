@@ -22,4 +22,7 @@ C:\swigwin-3.0.2 위치에 다운받은 파일 압축 풀고 집어넣기
 또 새로운 창이 생성되면 [새로 만들기(N)] 클릭
 C:\swigwin-3.0.2 입력
 그리고 컴퓨터 재시작후 라이브러리 설치 진행
+
+pip install setuptools wheel
+
 pip install pygame_phyics

@@ -161,18 +161,21 @@ class Scene:
         objs = json['objs']
         for name in objs.keys():
             for json_object in objs[name]:
-                args = change_dict(json_object)
-                parameters = list(json_object.keys())
-                prefab_class = Manger.classes.get(name)
-                if prefab_class == None:
-                    prefab_class = globals()[name]
+                try:
+                    args = change_dict(json_object)
+                    parameters = list(json_object.keys())
+                    prefab_class = Manger.classes.get(name)
                     if prefab_class == None:
-                        raise ImportError(f"{name} 클레스가 존재하지 않거나 불러지지 않았습니다. \n 현재 불러온 클래스 {Manger.classes}")
-                if list(inspect.signature(prefab_class).parameters.keys()) == parameters:
-                    prefab = prefab_class(*args)
-                    prefab.instantiate()
-                elif len(list(inspect.signature(prefab_class).parameters.keys())) == len(parameters):
-                    raise ValueError(f"리스트에 길이는 같으나 이름이 틀리거나 순서가 다른것같습니다.\njson :{parameters}\nclass:{list(inspect.signature(prefab_class).parameters.keys())}")
+                        prefab_class = globals()[name]
+                        if prefab_class == None:
+                            raise ImportError(f"{name} 클레스가 존재하지 않거나 불러지지 않았습니다. \n 현재 불러온 클래스 {Manger.classes}")
+                    if list(inspect.signature(prefab_class).parameters.keys()) == parameters:
+                        prefab = prefab_class(*args)
+                        prefab.instantiate()
+                    elif len(list(inspect.signature(prefab_class).parameters.keys())) == len(parameters):
+                        raise ValueError(f"리스트에 길이는 같으나 이름이 틀리거나 순서가 다른것같습니다.\njson :{parameters}\nclass:{list(inspect.signature(prefab_class).parameters.keys())}")
+                except ValueError as e:
+                    print("Error message: " + e)
         self.set_parent()
         
         self.set_physics_location()

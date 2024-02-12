@@ -39,23 +39,25 @@ class PhysicsLocation:
     
     @property
     def position(self):
-        parent = Vector(self.parent.world_position.x, self.parent.world_position.y)
-        world_pos = Vector(self.physics.body.transform.position.x * PPM, self.physics.body.transform.position.y * PPM)
-        return world_pos - parent
+        return self.world_position - self.parent.world_position
     
     @position.setter
     def position(self, value: Vector):
-        self.physics.body.transform.position.x = self.parent.position.x + value.x / PPM
-        self.physics.body.transform.position.y = self.parent.position.y + value.y / PPM
+        self.physics.body.transform.position.x = (self.parent.position.x + value.x) / PPM
+        self.physics.body.transform.position.y = (self.parent.position.y + value.y) / PPM
     
     @property
     def rotation(self):
-        parent = self.parent.rotation
-        return self.physics.angle - parent
+        parent = self.parent.world_rotation
+        return self.physics.body.angle - parent
+    
+    @rotation.setter
+    def rotation(self, value: int):
+        self.physics.body.angle = self.parent.world_rotation + value
     
     @getter
     def world_position(self):
-        return Vector(self.physics.body.transform.position.x, self.physics.body.transform.position.y)
+        return Vector(self.physics.body.transform.position.x, self.physics.body.transform.position.y) * PPM
     
     @getter
     def world_rotation(self):
