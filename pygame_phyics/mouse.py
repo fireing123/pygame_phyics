@@ -24,7 +24,6 @@ def mouse_event():
                             raise NotImplementedError
                         elif obj.collide == 'in':
                             obj.on_mouse_stay(get_pos())
-
                             raise NotImplementedError
                     elif obj.collide == 'in':
                         obj.collide = 'out'

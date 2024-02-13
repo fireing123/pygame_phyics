@@ -9,7 +9,7 @@ class Object(Component):
     """
     
     def __init__(self, name, layer, tag):
-        self.name = name
+        self.name = Manger.check_object_name(name)
         self.tag = tag
         self.layer = layer
 

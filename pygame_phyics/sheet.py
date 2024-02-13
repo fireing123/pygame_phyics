@@ -3,19 +3,14 @@ from pygame import image
 import xml.etree.ElementTree as xml
 
 class SurfaceSheet:
-    def __init__(self):
-        self.image : Surface
-    
-    @staticmethod
-    def load(path):
+    def __init__(self, path):
         root = xml.parse(path)
-        sheet = SurfaceSheet()
-        sheet.image = image.load(root.attrib['path'])
-        sheet.images = {}
+        self.image = image.load(root.attrib['path'])
+        self.images = {}
         for child in root:
             att = child.attrib
             xywh = map(int, (att['x'], att['y'], att['width'], att['height']))
-            sheet.images[att['name']] = SurfaceSheet.get_image(sheet, *xywh)
+            self.images[att['name']] = self.get_image(self, *xywh)
             
     def get_image(self, x, y, width, height):
         image = Surface((width, height))

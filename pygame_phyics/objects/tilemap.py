@@ -1,23 +1,36 @@
 import pygame
 from pygame_phyics import util
 from pygame_phyics.manger import Manger
+from pygame_phyics.sheet import SurfaceSheet
 from pygame_phyics.objects.gameobject import GameObject
 
 
 class TileMap(GameObject):
-    def __init__(self, name, layer, tag, visible, position, rotation, parent_name, tiles: list[dict[int, dict[int, str]]], data: dict[str, dict]):
+    def __init__(self, name, layer, tag, visible, position, rotation, parent_name,  tiles: list[dict[int, dict[int, str]]], data: dict[str, dict]):
         super().__init__(name, layer, tag, visible, position, rotation, parent_name)
         self.tiles = tiles
         self.size = data['size']
-        self.canvas = {key: pygame.image.load(path) for key, path in data['canvas'].items()}
-        self.str_canvas = data['canvas'].values()
+        if data.get('sheet', None) == None:
+            self.canvas = {key: pygame.image.load(path) for key, path in data['canvas'].items()}
+            self.str_canvas = data['canvas'].values()
+        else:
+            self.sheet = SurfaceSheet(data['sheet'])
+            self.sheet_path = data['sheet']
+            self.canvas = self.sheet.images
+
         
     @util.getter
     def data(self):
-        return {
-            "size": self.size,
-            "canvas": self.str_canvas
-        }
+        if hasattr(self, 'sheet'):
+            return {
+                "size": self.size,
+                "sheet": self.sheet_path
+            }
+        else:
+            return {
+                "size": self.size,
+                "canvas": self.str_canvas
+            }
         
     def set_tile(self, xy, value):
         match xy:
