@@ -7,12 +7,12 @@ from pygame_phyics.vector import Vector
 
 class GameObject(Object):
     """마우스 충돌 연산가능함"""
-    def __init__(self, supe, visible, position, rotate, parent_name):
-        super().__init__(*supe)
+    def __init__(self, name, layer, tag, visible, position, rotation, parent_name):
+        super().__init__(name, layer, tag)
         self.visible = visible
         self.rect = None
         self.collide = 'out'
-        self.location = Location(Vector(*position), rotate)
+        self.location = Location(Vector(*position), rotation)
         self.parent_name = parent_name
     
     @util.getter

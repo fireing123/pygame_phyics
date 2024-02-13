@@ -5,8 +5,8 @@ from pygame_phyics.objects.gameobject import GameObject
 
 
 class TileMap(GameObject):
-    def __init__(self, supe, tiles: list[dict[int, dict[int, str]]], data: dict[str, dict]):
-        super().__init__(*supe)
+    def __init__(self, name, layer, tag, visible, position, rotation, parent_name, tiles: list[dict[int, dict[int, str]]], data: dict[str, dict]):
+        super().__init__(name, layer, tag, visible, position, rotation, parent_name)
         self.tiles = tiles
         self.size = data['size']
         self.canvas = {key: pygame.image.load(path) for key, path in data['canvas'].items()}

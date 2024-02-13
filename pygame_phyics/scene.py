@@ -7,10 +7,6 @@ from typing import List
 from pygame_phyics.objects import *
 from pygame_phyics.manger import Manger
 
-def change_dict(args: dict):
-    new_args = [change_dict(arg) if key=='supe' else arg for key, arg in args.items()]
-    return new_args
-
 class Scene:
     """여기로 오브젝트가 등록되고 공통함수를 실행합니다
     """
@@ -162,7 +158,7 @@ class Scene:
         for name in objs.keys():
             for json_object in objs[name]:
                 try:
-                    args = change_dict(json_object)
+                    args = list(json_object.values())
                     parameters = list(json_object.keys())
                     prefab_class = Manger.classes.get(name)
                     if prefab_class == None:
@@ -173,9 +169,9 @@ class Scene:
                         prefab = prefab_class(*args)
                         prefab.instantiate()
                     elif len(list(inspect.signature(prefab_class).parameters.keys())) == len(parameters):
-                        raise ValueError(f"리스트에 길이는 같으나 이름이 틀리거나 순서가 다른것같습니다.\njson :{parameters}\nclass:{list(inspect.signature(prefab_class).parameters.keys())}")
+                        raise ValueError(f"리스트에 길이는 같으나 이름이 틀리거나 순서가 다른것같습니다.\njson :{parameters}\n{name} class:{list(inspect.signature(prefab_class).parameters.keys())}")
                 except ValueError as e:
-                    print("Error message: " + e)
+                    print("Error message: ", e)
         self.set_parent()
         
         self.set_physics_location()

@@ -10,14 +10,13 @@ from pygame_phyics.timertask import OnceTimerTask, TimerTask
 
 
 class InputField(UI):
-    def __init__(self, supe, scale, color, font, interval, rect):
-        super().__init__(*supe)
+    def __init__(self, name, layer, tag, visible, position, rotation, parent_name, scale, color, font, interval, rect):
+        super().__init__(name, layer, tag, visible, position, rotation, parent_name)
         self.image = ImageObject(self, surface=rect, type='topleft', follow=True, collide=True)
         self.image.og_image.fill((0, 0, 0, 128))
         self.input_line = ImageObject(self, surface=(5, scale[1]), type="topleft", follow=True)
         self.input_line.og_image.fill((255,255,255, 255))
-        ((name, layer, tag), visible, pos, rot, pn), = supe
-        self.field = Text((((name + '_text', layer, tag + "_text"), visible, [0, 0], 0, name),), scale[1], color, font, interval)
+        self.field = Text(name + '_text', layer, tag + "_text", visible, [0, 0], 0, name, scale[1], color, font, interval)
         self.text = ""
         self.focused = False
         self.editing_pos = 0

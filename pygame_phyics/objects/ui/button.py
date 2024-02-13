@@ -5,8 +5,8 @@ from pygame_phyics.objects.image import ImageObject
 
 
 class Button(UI):
-    def __init__(self, supe, default, clicked):
-        super().__init__(*supe)
+    def __init__(self, name, layer, tag, visible, position, rotation, parent_name, default, clicked):
+        super().__init__(name, layer, tag, visible, position, rotation, parent_name)
         self.default = ImageObject(self, default, follow=True, collide=True)
         self.clicked = ImageObject(self, clicked, follow=True, collide=True)
         self.image = self.default

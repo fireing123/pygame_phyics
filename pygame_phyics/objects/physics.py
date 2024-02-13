@@ -11,8 +11,8 @@ from pygame_phyics.vector import Vector
 class Physics(GameObject, Joint):
     """물리오브젝트에 공통점"""
     
-    def __init__(self, supe):
-        GameObject.__init__(self, *supe)
+    def __init__(self, name, layer, tag, visible, position, rotation, parent_name):
+        GameObject.__init__(self, name, layer, tag, visible, position, rotation, parent_name)
         self.collide_enter = None
         self.bpos = self.location.position
         self.brot = self.location.rotation
@@ -62,8 +62,8 @@ Box2D.b2PolygonShape.render = polygon_render
 
 class StaticObject(Physics): 
     """정적 물리 오브젝트"""
-    def __init__(self, supe, scale, shape_type, collide_visible):
-        super().__init__(*supe)
+    def __init__(self, name, layer, tag, visible, position, rotation, parent_name, scale, shape_type, collide_visible):
+        super().__init__(name, layer, tag, visible, position, rotation, parent_name)
         self.collide_visible = collide_visible
         match shape_type:
             case "chain":
@@ -82,9 +82,9 @@ class StaticObject(Physics):
 
 class DynamicObject(Physics):
     """동적 물리 오브젝트"""
-    def __init__(self, supe, scale : tuple | float, shape_type, collide_visible,
+    def __init__(self, name, layer, tag, visible, position, rotation, parent_name, scale : tuple | float, shape_type, collide_visible,
         density, friction):
-        super().__init__(*supe)
+        super().__init__(name, layer, tag, visible, position, rotation, parent_name)
         self.collide_visible = collide_visible
         self.body : Box2D.b2Body = Manger.world.CreateDynamicBody()
         self.body.userData = self
