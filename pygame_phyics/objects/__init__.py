@@ -2,6 +2,7 @@
 from pygame_phyics.objects.component import Component
 from pygame_phyics.objects.image import ImageObject
 from pygame_phyics.objects.object import Object
+from pygame_phyics.objects.camera import CameraObject
 from pygame_phyics.objects.parent import ParentObject
 from pygame_phyics.objects.gameobject import GameObject
 from pygame_phyics.objects.tilemap import TileMap

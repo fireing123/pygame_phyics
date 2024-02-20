@@ -9,7 +9,10 @@ class Text(UI):
     def __init__(self, name, layer, tag, visible, position, rotation, parent_name, size, color, Font, interval):
         super().__init__(name, layer, tag, visible, position, rotation, parent_name)
         self.Font = Font
-        self.font = pygame.font.Font(Font, size)
+        if Font.startswith('./'):
+            self.font = pygame.font.Font(Font, size)
+        else: 
+            self.font = pygame.font.SysFont(Font, size)
         self.size = size
         self.interval = interval
         self.color = color

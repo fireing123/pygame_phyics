@@ -1,21 +1,17 @@
 {
     "setting": {
+        "tile": [],
+        "surface": []
     },
     "objs": {
         "ParentObject": [{}],
-        "TileMap": [
-            {
-                "name": "tilemap",
-                "layer": 2,
-                "tag": "tile",
-                "visible": true,
-                "position": [0, 0],
-                "rotation": 0,
-                "parent_name": "parent",
-                "tiles": [{"0": {"0": "1","1": "1","2": "1","3": "1","4": "1","5": "1"}},{"0": {"0": "1","1": "1","2": "1","3": "1","4": "1","5": "1"}},{"1": {"0": "1","1": "1","2": "1","3": "1","4": "1","5": "1"}},{"1": {"0": "1","1": "1","2": "1","3": "1","4": "1","5": "1"}}],
-                "data": {"size":60,"canvas": {"1": "./core.png"}}
-            }
-        ],
+        "CameraObject": [{
+            "name": "main_cam",
+            "tag": "camera",
+            "position": [0, 0],
+            "rotation": 0
+        }],
+
         "Text": [
             {
 

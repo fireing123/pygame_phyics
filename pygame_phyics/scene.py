@@ -1,18 +1,18 @@
 import inspect
 
 import pygame
-from pygame_phyics.camera import Camera
 import pygame_phyics.util as _util
 from typing import List
 from pygame_phyics.objects import *
 from pygame_phyics.manger import Manger
+from pygame_phyics.sheet import TileSheet, SurfaceSheet
 
 class Scene:
     """여기로 오브젝트가 등록되고 공통함수를 실행합니다
     """
     
     def __init__(self):
-        self.camera = Camera(0, 0, 0)
+
         self.layers = [[],[],[],[],[],[],[],[]]
     
     def layer_loop(self, method: str, *args, **kwargs):
@@ -114,10 +114,18 @@ class Scene:
                     objs.append(layer[i])
         return objs
     
+    @property
+    def display(self):
+        return self.__display
+    
+    @display.setter
+    def display(self, value):
+        self.__display = value
+        self.camera = self.get_objects(value)[0]
+
     def __del__(self):
         self.clear()
         del self.layers
-        del self.camera
     
     def darkening(self):
         """
@@ -145,12 +153,8 @@ class Scene:
         """
         json : dict = _util.jsopen(path)
         setting : dict = json['setting']
-        
-        if setting.get('camera') != None:
-            self.camera.vector.x = setting['camera'][0]
-            self.camera.vector.y = setting['camera'][1]
-            self.camera.angle = setting['camera'][2]
-            setting.pop('camera')
+        Manger.tile_sheet = [TileSheet(*til) for til in setting['tile']]
+        Manger.surface_sheet = [SurfaceSheet(*suf) for suf in setting['surface']]
         for key, value in setting.items():
             setattr(Manger, key, value)
         
@@ -172,6 +176,10 @@ class Scene:
                         raise ValueError(f"리스트에 길이는 같으나 이름이 틀리거나 순서가 다른것같습니다.\njson :{parameters}\n{name} class:{list(inspect.signature(prefab_class).parameters.keys())}")
                 except ValueError as e:
                     print("Error message: ", e)
+        
+
         self.set_parent()
         
         self.set_physics_location()
+
+        self.display = setting.get('display', 'main_cam')
