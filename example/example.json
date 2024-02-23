@@ -11,10 +11,8 @@
             "position": [0, 0],
             "rotation": 0
         }],
-
         "Text": [
             {
-
                 "name": "eello",
                 "layer": 3,
                 "tag": "ta",
