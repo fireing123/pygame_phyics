@@ -153,8 +153,8 @@ class Scene:
         """
         json : dict = _util.jsopen(path)
         setting : dict = json['setting']
-        Manger.tile_sheet = [TileSheet(*til) for til in setting['tile']]
-        Manger.surface_sheet = [SurfaceSheet(*suf) for suf in setting['surface']]
+        Manger.tile_sheet = {til[1] : TileSheet(*til) for til in setting['tile']}
+        Manger.surface_sheet = {suf[1] : SurfaceSheet(*suf) for suf in setting['surface']}
         for key, value in setting.items():
             setattr(Manger, key, value)
         
