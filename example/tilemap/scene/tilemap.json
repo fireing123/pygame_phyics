@@ -1,0 +1,43 @@
+{
+    "setting": {
+        "tile": [
+            ["tile", "./tilesheet/tiles.png", 32]
+        ],
+        "surface": []
+    },
+    "objs": {
+        "ParentObject": [{}],
+        "CameraObject": [{
+            "name": "main_cam",
+            "tag": "camera",
+            "position": [0, 0],
+            "rotation": 0
+        }],
+        "TileMap" : [
+            {
+                "name": "tilemap",
+                "layer": 2,
+                "tag": "map",
+                "visible": true,
+                "position": [0, 0],
+                "rotation": 0,
+                "parent_name": "parent",
+                "tiles": [
+                    [
+                        [1]
+                    ],     
+                    [    
+                        [2]
+                    ],
+                    [
+                        [3]
+                    ],
+                    [
+                        [4]
+                    ]
+                ],
+                "sheet_name": "tile"
+            }
+        ]
+    }
+}

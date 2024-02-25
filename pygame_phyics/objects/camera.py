@@ -1,3 +1,5 @@
+from pygame import Surface
+from pygame_phyics.camera import Camera
 from pygame_phyics.objects.object import Object
 from pygame_phyics.location import Location
 from pygame_phyics.vector import Vector
@@ -27,3 +29,6 @@ class CameraObject(Object):
         rotated = Vector(Manger.WIDTH/2, Manger.HEIGHT/2).rotate_vector(Vector(*position), self.location.rotation)
         camerad = rotated - self.location.position
         return camerad.xy
+    
+    def render(self, surface: Surface, camera: Camera):
+        surface.fill((127, 127, 127))

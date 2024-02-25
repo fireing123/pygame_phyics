@@ -22,5 +22,9 @@ class TileSheet:
         x, y = self.image.get_size()
         fx = 0
         fy = 0
-        for i in range(x * y / size ** 2):
-            self.surfaces.append(self.image.subsurface((fx, fy, size, size)))
+        for i in range(int(y / size)):
+            for j in range(int(x / size)):
+                self.surfaces.append(self.image.subsurface((fx, fy, size, size)))
+                fx += size
+            fy += size
+            fx = 0
