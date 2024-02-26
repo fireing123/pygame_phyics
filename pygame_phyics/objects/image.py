@@ -39,7 +39,7 @@ class ImageObject(Component):
             if self.is_follow_camera:
                 self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.location.rotation)
             else:
-                self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.location.rotation + Manger.scene.camera.angle)
+                self.image = pygame.transform.rotate(self.og_image, self.angle + self.object.location.rotation + Manger.scene.camera.location.rotation)
             
             if self.is_follow_camera:
                 surface.blit(self.image, self.rect.topleft)

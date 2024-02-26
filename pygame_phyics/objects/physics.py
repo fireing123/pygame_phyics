@@ -50,14 +50,14 @@ class Physics(GameObject, Joint):
 def circle_render(circle, body, surface, camera):
     position = body.transform * circle.pos * PPM
     position = camera((position[0], Manger.HEIGHT - position[1]))
-    pygame.draw.circle(surface, (127, 127, 127, 255), [int(
+    pygame.draw.circle(surface, (0, 0, 0, 255), [int(
         x) for x in position], int(circle.radius * PPM), 1)
 Box2D.b2CircleShape.render = circle_render
 def polygon_render(polygon, body, surface, camera):
     vertices = [(body.transform * v) * PPM for v in polygon.vertices]
     vertices = [(v[0], Manger.HEIGHT - v[1]) for v in vertices]
     vertices = [camera(v) for v in vertices]
-    pygame.draw.polygon(surface, (127, 127, 127, 255), vertices, 1)
+    pygame.draw.polygon(surface, (0, 0, 0, 255), vertices, 1)
 Box2D.b2PolygonShape.render = polygon_render
 
 class StaticObject(Physics): 
