@@ -31,6 +31,7 @@ def example():
                 Manger.scene.camera.vector.x -= 10
             if event.key == pygame.K_RIGHT:
                 Manger.scene.camera.vector.x += 10
+            
     def update(cls):
         Manger.screen.fill((60, 60, 60, 255))
     return start, event, update

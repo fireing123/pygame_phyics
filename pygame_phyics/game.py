@@ -163,4 +163,8 @@ class Game:
                 )
             
             Manger.scene.render(Manger.screen)
+
+            if Manger.scene.camera.status == 'glitch':
+                Manger.scene.camera.glitch.render(Manger.screen)
+
             pygame.display.update()

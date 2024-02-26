@@ -4,13 +4,16 @@ from pygame_phyics.objects.object import Object
 from pygame_phyics.location import Location
 from pygame_phyics.vector import Vector
 from pygame_phyics.manger import Manger
+from pygame_phyics.effect import Glitch
 
 class CameraObject(Object):
     def __init__(self, name, tag, position, rotation):
         super().__init__(name, 0, tag)
         self.visible = False
+        self.status = "idle"
         self.rect = None
         self.collide = 'out'
+        self.glitch = Glitch()
         self.location = Location(Vector(*position), rotation)
 
     def set_parent(self):
@@ -29,6 +32,6 @@ class CameraObject(Object):
         rotated = Vector(Manger.WIDTH/2, Manger.HEIGHT/2).rotate_vector(Vector(*position), self.location.rotation)
         camerad = rotated - self.location.position
         return camerad.xy
-    
+
     def render(self, surface: Surface, camera: Camera):
         surface.fill((127, 127, 127))

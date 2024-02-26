@@ -8,7 +8,7 @@ class TimerTask:
     **주의사항 int 나 str 같은것들은 생성 당시 값을 가지므로
     실시간 숫자를 가져오려면 람다식을 사용하시는게 좋습니다
     """
-    def __init__(self, tick: int, event: Callable, *value, **kwargs):
+    def __init__(self, tick: int, event: Callable = lambda:None, *value, **kwargs):
         """틱마다 이벤트를 실행합니다
         **주의사항 int 나 str 같은것들은 생성 당시 값을 가지므로
         실시간 숫자를 가져오려면 람다식을 사용하시는게 좋습니다
@@ -52,7 +52,7 @@ class OnceTimerTask(TimerTask):
     리셋되멘 다시 실행할수 있다
     기다릴떄 리셋하고 실행하는게 좋을것같다
     """
-    def __init__(self, tick, event, *value, **kwargs):
+    def __init__(self, tick, event=lambda:None, *value, **kwargs):
         super().__init__(tick, event, *value, **kwargs)
         self.once = False
     

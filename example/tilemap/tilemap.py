@@ -22,6 +22,12 @@ def tilemap():
             if event.key == pygame.K_g:
                 a, b = map(int, input().split())
                 print(tilemapOB.get_tile((a, b), True))
+            if event.key == pygame.K_o:
+                print("on")
+                Manger.scene.camera.status = 'glitch'
+            if event.key == pygame.K_f:
+                print("off")
+                Manger.scene.camera.status = 'idle'
 
     def update(cls):
         pass
