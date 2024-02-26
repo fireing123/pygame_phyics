@@ -14,42 +14,53 @@ class TileMap(GameObject):
         self.canvas = self.sheet.surfaces
 
     def set_tile(self, xy, value):
+        x, y = xy
+        layer = 0
         match xy:
-            case n if n[0] >= 0 and n[1] >= 0:
-                y = self.tiles[0][n[1]]
-                if y != None:
-                    y[n[0]] = value
-                else:
-                    y = [][n[0]] = value
-            case n if n[0] < 0 and n[1] >= 0:
-                y = self.tiles[0][n[1]]
-                if y != None:
-                    y[-n[0]] = value
-                else:
-                    y = [][-n[0]] = value
+            case n if n[0] >= 0 and n[1] >= 1:
+                y -= 1
+                layer = 0
+            case n if n[0] <= -1 and n[1] >= 1:
+                x = -x -1
+                y -= 1
+                layer = 1
             case n if n[0] < 0 and n[1] < 0:
-                y = self.tiles[0][-n[1]]
-                if y != None:
-                    y[-n[0]] = value
-                else:
-                    y = [][n[0]] = value
+                x = -x -1
+                y = -y
+                layer = 2
             case n if n[0] >= 0 and n[1] < 0:
-                y = self.tiles[0][-n[1]]
-                if y != None:
-                    y[n[0]] = value
-                else:
-                    y = [][n[0]] = value
-        
-    def get_tile(self, xy):
+                y = -y
+                layer = 3
+        try:
+            ly = self.tiles[layer][y]
+            l = len(ly) - 1
+            if l >= x:
+                ly[x] = value
+            else:
+                m = x -l
+                ly.extend([None] * m)
+                ly[x] = value
+        except IndexError as e:
+            ly = [None] * (n[0] + 1)
+            ly = [[n[0]]] = value
+            l = len(self.tiles[layer]) - 1
+            if l >= y:
+                self.tiles[layer][y] = ly
+            else:
+                m = y - l
+                self.tiles[layer].extend([[]] * m)
+                self.tiles[layer][y] = ly
+
+    def get_tile(self, xy, db=None):
         try:
             match xy:
-                case n if n[0] >= 0 and n[1] >= 0:
+                case n if n[0] >= 0 and n[1] >= 1:
                     return self.tiles[0][n[1] - 1][n[0]]
-                case n if n[0] < 0 and n[1] >= 0:
+                case n if n[0] <= -1 and n[1] >= 1:
                     return self.tiles[1][n[1] - 1][-n[0] - 1]
-                case n if n[0] < 0 and n[1] < 0:
+                case n if n[0] <= -1 and n[1] <= 0:
                     return self.tiles[2][-n[1]][-n[0] - 1]
-                case n if n[0] >= 0 and n[1] < 0:
+                case n if n[0] >= 0 and n[1] <= 0:
                     return self.tiles[3][-n[1]][n[0]]
         except:
             return None
