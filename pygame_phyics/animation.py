@@ -1,11 +1,10 @@
 from pygame_phyics import Manger
 from pygame_phyics.timertask import TimerTask
-import xml.etree.ElementTree as xml
 
 class Animation:
     def __init__(self, tick, image_object, **kwargs):
         self.object = image_object
-        self.period = TimerTask(tick, self.change_image)
+        self.period = TimerTask(tick)
         self.index = 0
         if  kwargs.get('sheet', None) != None:
             self.sheet = Manger.surface_sheet[kwargs['sheet']]
@@ -19,7 +18,8 @@ class Animation:
         self.len = len(self.images)
         
     def update(self):
-        self.period.run_periodic_task()
+        if self.period.run_periodic_task():
+            self.change_image()
 
     def change_image(self):
         self.object.og_image = self.images[self.index]

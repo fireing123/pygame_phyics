@@ -44,6 +44,9 @@ class Event:
         """
         self.lisners.remove(function)
     
+    def clear(self):
+        self.lisners.clear()
+
     def invoke(self, *arg):
         """lisners의 함수들을 실행합니다."""
         for function in self.lisners:
