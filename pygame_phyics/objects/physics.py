@@ -1,19 +1,18 @@
 import pygame
 import Box2D
 from pygame_phyics import PPM
-from pygame_phyics.location import Location, PhysicsLocation
+from pygame_phyics.location import PhysicsLocation
 from pygame_phyics.manger import Manger
 from pygame_phyics.objects.gameobject import GameObject
 from pygame_phyics.objects.joint import Joint
-from pygame_phyics.vector import Vector
-
+from pygame_phyics.collison import Collison
 
 class Physics(GameObject, Joint):
     """물리오브젝트에 공통점"""
     
     def __init__(self, name, layer, tag, visible, position, rotation, parent_name):
         GameObject.__init__(self, name, layer, tag, visible, position, rotation, parent_name)
-        self.collide_enter = None
+        self.collide_enter = []
         self.bpos = self.location.position
         self.brot = self.location.rotation
         self.location = PhysicsLocation(self)
@@ -24,7 +23,7 @@ class Physics(GameObject, Joint):
         del self.bpos
         del self.brot
     
-    def on_collision_enter(self, collision: GameObject):
+    def on_collision_enter(self, collision: Collison):
         """물리 오브젝트가 충돌시 이 함수가 호출됩니다
 
         Args:
@@ -34,7 +33,7 @@ class Physics(GameObject, Joint):
     
     def clean_collision(self):
         """충돌하고 상대 오브젝트 주소를 삭제해 다음 충돌을 받을수 있도록 합니다"""
-        self.collide_enter = None
+        self.collide_enter.clear()
     
     def render(self, surface, camera):
         if self.collide_visible:

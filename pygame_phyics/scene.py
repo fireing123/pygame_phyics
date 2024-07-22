@@ -6,7 +6,7 @@ from typing import List
 from pygame_phyics.objects import *
 from pygame_phyics.manger import Manger
 from pygame_phyics.sheet import TileSheet, SurfaceSheet
-
+from pygame_phyics.collison import Collison
 class Scene:
     """여기로 오브젝트가 등록되고 공통함수를 실행합니다
     """
@@ -23,16 +23,17 @@ class Scene:
         """
         for layer in self.layers:
             for obj in layer:
+                func = getattr(obj, method)
                 if kwargs.get("only") == "phyics":
                     if isinstance(obj, Physics):
-                        func = getattr(obj, method)
-                        func(*args)
-                elif kwargs.get('collide'):
-                    if getattr(obj, "collide_enter", None) != None:
-                        func = getattr(obj, method)
-                        func(obj.collide_enter)
+                        if kwargs.get('collide'):
+                            if len(obj.collide_enter) != 0:
+                                for collide in obj.collide_enter:
+                                    collison = Collison(collide, obj)
+                                    func(collison)
+                        else:
+                            func(*args)
                 else:
-                    func = getattr(obj, method)
                     func(*args)
     
     def update(self):
@@ -128,17 +129,11 @@ class Scene:
         del self.layers
     
     def darkening(self):
-        """
-        화면 전환시 실행돠는 함수
-        따로 override 해서 사용하세요
-        """
+        """적합하지 않다 판단됨 [사용되지 않음]"""
         pass
     
     def brightening(self):
-        """
-        화면 전환시 실행돠는 함수
-        따로 override 해서 사용하세요
-        """
+        """적합하지 않다 판단됨 [사용되지 않음]"""
         pass
 
     def load(self, path: str):

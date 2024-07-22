@@ -29,6 +29,7 @@ from pygame_phyics.mouse import mouse_event
 from pygame_phyics.instantiate import import_module
 from pygame_phyics.input import Input
 from pygame_phyics.event import Event
+from pygame_phyics.objects import Physics
 import pygame_phyics.mouse as mouse
 
 
@@ -37,12 +38,16 @@ class ContactListener(b2ContactListener):
     def BeginContact(self, contact):
         fixtureA = contact.fixtureA
         fixtureB = contact.fixtureB
-        a_obj = fixtureA.body.userData 
-        b_obj = fixtureB.body.userData
+        a_obj : Physics = fixtureA.body.userData 
+        b_obj : Physics = fixtureB.body.userData
         if a_obj != None:
-            a_obj.collide_enter = b_obj
+            a_obj.collide_enter.append(b_obj)
+        else:
+            raise ValueError("충돌한 물리 객체의 GameObject가 존재하지 않음." , a_obj)
         if b_obj != None:
-            b_obj.collide_enter = a_obj
+            b_obj.collide_enter.append(a_obj)
+        else:
+            raise ValueError("충돌한 물리 객체의 GameObject가 존재하지 않음." , b_obj)
 
 def world(world_path: str):
     """함수를 새상으로 등록하는 데코레이터 입니다
@@ -52,7 +57,6 @@ def world(world_path: str):
     """
     def real_world(func):
         def wrapper():
-            Manger.scene.darkening()
             Manger.world = b2World()
             contact_listener = ContactListener()
             Manger.world.contactListener = contact_listener
@@ -60,7 +64,6 @@ def world(world_path: str):
             Manger.scene.load(world_path)
             start, event, update = func()
             start(Game)
-            Manger.scene.brightening()
             Game.loop(event, update)
             del Manger.scene
             del Manger.world
