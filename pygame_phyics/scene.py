@@ -23,7 +23,7 @@ class Scene:
         """
         for layer in self.layers:
             for obj in layer:
-                func = getattr(obj, method)
+                func = getattr(obj, method, None)
                 if kwargs.get("only") == "phyics":
                     if isinstance(obj, Physics):
                         if kwargs.get('collide'):
@@ -47,7 +47,7 @@ class Scene:
     def on_collision_enter(self):
         """충돌 함수를 호출합니다
         """
-        self.layer_loop("on_collision_enter", collide=True)
+        self.layer_loop("on_collision_enter", only="phyics", collide=True)
         self.layer_loop("clean_collision", only="phyics")
     
     def set_physics_location(self): 
