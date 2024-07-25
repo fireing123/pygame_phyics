@@ -1,8 +1,7 @@
 import pygame
 from pygame_phyics.objects.ui import NEWLINE
 from pygame_phyics.objects.ui.ui import UI
-from pygame_phyics.vector import Vector
-
+from pygame.math import Vector2 as Vector
 
 class Text(UI):
     """글자를 화면에 나타냄"""

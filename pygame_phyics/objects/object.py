@@ -12,6 +12,7 @@ class Object(Component):
         self.name = Manger.check_object_name(name)
         self.tag = tag
         self.layer = layer
+        self.components : list[Component] = []
 
     def delete(self): 
         """씬에서 이 오브젝트를 삭제합니다"""

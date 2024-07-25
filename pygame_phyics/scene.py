@@ -6,7 +6,7 @@ from typing import List
 from pygame_phyics.objects import *
 from pygame_phyics.manger import Manger
 from pygame_phyics.sheet import TileSheet, SurfaceSheet
-from pygame_phyics.collison import Collison
+
 class Scene:
     """여기로 오브젝트가 등록되고 공통함수를 실행합니다
     """
@@ -14,44 +14,21 @@ class Scene:
     def __init__(self):
 
         self.layers = [[],[],[],[],[],[],[],[]]
-    
-    def layer_loop(self, method: str, *args, **kwargs):
-        """레이어를 순환하며 겍체에 method 를 실행합니다
 
-        Args:
-            method (str): 실행할 함수 이름 
-        """
-        for layer in self.layers:
-            for obj in layer:
-                func = getattr(obj, method, None)
-                if kwargs.get("only") == "phyics":
-                    if isinstance(obj, Physics):
-                        if kwargs.get('collide'):
-                            if len(obj.collide_enter) != 0:
-                                for collide in obj.collide_enter:
-                                    collison = Collison(collide, obj)
-                                    func(collison)
-                        else:
-                            func(*args)
-                else:
-                    func(*args)
-    
     def update(self):
         """등록된 객체에 update 함수를 실행합니다
         """
-        self.layer_loop("update")
+        for layer in self.layers:
+            for obj in layer:
+                obj.update()
+                for component in obj.components:
+                    component.update()
     
     def set_parent(self):
-        self.layer_loop("set_parent")
-    
-    def on_collision_enter(self):
-        """충돌 함수를 호출합니다
-        """
-        self.layer_loop("on_collision_enter", only="phyics", collide=True)
-        self.layer_loop("clean_collision", only="phyics")
-    
-    def set_physics_location(self): 
-        self.layer_loop("set_location", only='phyics')
+        for layer in self.layers:
+            for obj in layer:
+                obj.set_parent()
+            
     
     def render(self, surface: pygame.Surface):
         """등록된 객체에 render 함수를 실행합니다
@@ -59,7 +36,11 @@ class Scene:
         Args:
             surface (pygame.Surface): 화면
         """
-        self.layer_loop("render", surface, self.camera)
+        for layer in self.layers:
+            for obj in layer:
+                obj.render(surface, self.camera)
+                for component in obj.components:
+                    component.render(surface, self.camera)
     
     def add(self, obj: GameObject):
         """
@@ -127,14 +108,6 @@ class Scene:
     def __del__(self):
         self.clear()
         del self.layers
-    
-    def darkening(self):
-        """적합하지 않다 판단됨 [사용되지 않음]"""
-        pass
-    
-    def brightening(self):
-        """적합하지 않다 판단됨 [사용되지 않음]"""
-        pass
 
     def load(self, path: str):
         """오브젝트를 생성하고 새계에 등록합니다
@@ -148,11 +121,13 @@ class Scene:
         """
         json : dict = _util.jsopen(path)
         setting : dict = json['setting']
-        Manger.tile_sheet = {til[0] : TileSheet(*til) for til in setting['tile']}
-        Manger.surface_sheet = {suf[0] : SurfaceSheet(*suf) for suf in setting['surface']}
+        #Manger.tile_sheet = {til[0] : TileSheet(*til) for til in setting['tile']}
+        #Manger.surface_sheet = {suf[0] : SurfaceSheet(*suf) for suf in setting['surface']} 직접 하는게 직관적
         for key, value in setting.items():
             setattr(Manger, key, value)
-        
+
+        parent_object = ParentObject() # 우주 느낌
+        parent_object.instantiate()
         objs = json['objs']
         for name in objs.keys():
             for json_object in objs[name]:
@@ -174,7 +149,6 @@ class Scene:
         
 
         self.set_parent()
-        
-        self.set_physics_location()
+        parent_object.location.set_world()
 
         self.display = setting.get('display', 'main_cam')

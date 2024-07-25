@@ -2,7 +2,7 @@ from pygame import Surface
 from pygame_phyics.camera import Camera
 from pygame_phyics.objects.object import Object
 from pygame_phyics.location import Location
-from pygame_phyics.vector import Vector
+from pygame.math import Vector2 as Vector
 from pygame_phyics.manger import Manger
 from pygame_phyics.effect import Glitch
 
@@ -29,7 +29,8 @@ class CameraObject(Object):
         Returns:
             tuple[float, float]: 카메라 시선이 적용된 위치
         """
-        rotated = Vector(Manger.WIDTH/2, Manger.HEIGHT/2).rotate_vector(Vector(*position), self.location.rotation)
+        zero_vector = Vector(Manger.WIDTH/2, Manger.HEIGHT/2) - Vector(*position)
+        rotated = zero_vector.rotate(self.location.rotation)
         camerad = rotated - self.location.position
         return camerad.xy
 

@@ -1,10 +1,7 @@
 {
     "setting": {
-        "tile": [],
-        "surface": []
     },
     "objs": {
-        "ParentObject": [{}],
         "CameraObject": [{
             "name": "main_cam",
             "tag": "camera",
@@ -17,7 +14,7 @@
                 "layer": 3,
                 "tag": "ta",
                 "visible": true,
-                "position": [0.0, 100.0],
+                "position": [0.0, 0.0],
                 "rotation": 0,
                 "parent_name": "parent",
                 "size": 50,
@@ -32,7 +29,7 @@
                 "layer": 3,
                 "tag": "ta",
                 "visible": true,
-                "position": [400.0, 100.0],
+                "position": [0.0, 0.0],
                 "rotation": 0,
                 "parent_name": "parent",
                 "scale": [50, 50],

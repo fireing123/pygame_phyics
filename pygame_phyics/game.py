@@ -41,11 +41,25 @@ class ContactListener(b2ContactListener):
         a_obj : Physics = fixtureA.body.userData 
         b_obj : Physics = fixtureB.body.userData
         if a_obj != None:
-            a_obj.collide_enter.append(b_obj)
+            a_obj.collide_enter[b_obj] = 'enter'
         else:
             raise ValueError("충돌한 물리 객체의 GameObject가 존재하지 않음." , a_obj)
         if b_obj != None:
-            b_obj.collide_enter.append(a_obj)
+            b_obj.collide_enter[a_obj] = 'enter'
+        else:
+            raise ValueError("충돌한 물리 객체의 GameObject가 존재하지 않음." , b_obj)
+        
+    def EndContact(self, contact):
+        fixtureA = contact.fixtureA
+        fixtureB = contact.fixtureB
+        a_obj : Physics = fixtureA.body.userData 
+        b_obj : Physics = fixtureB.body.userData
+        if a_obj != None:
+            a_obj.collide_enter[b_obj] = 'exit'
+        else:
+            raise ValueError("충돌한 물리 객체의 GameObject가 존재하지 않음." , a_obj)
+        if b_obj != None:
+            b_obj.collide_enter[a_obj] = 'exit'
         else:
             raise ValueError("충돌한 물리 객체의 GameObject가 존재하지 않음." , b_obj)
 
@@ -156,8 +170,6 @@ class Game:
                 events(cls, event)
 
             Manger.scene.update()
-            
-            Manger.scene.on_collision_enter()
 
             Manger.world.Step(
                 cls.time_step,

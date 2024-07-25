@@ -1,5 +1,3 @@
-from collections.abc import Callable
-import math
 import json as jsmodule
 from pygame_phyics.error import JsonSerializableError
 from pygame_phyics.error import ImmutableAttributeError

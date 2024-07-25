@@ -1,4 +1,4 @@
-from pygame_phyics.vector import Vector
+from pygame.math import Vector2 as Vector
 from pygame_phyics.util import getter
 from pygame_phyics import PPM
 
@@ -10,55 +10,102 @@ class Parent:
         self.world_rotation = 0
         self.children = []
 
+    def set_world(self):
+        for child in self.children:
+            child.change_location()
+
 class Location(Parent):
     def __init__(self, position: Vector, rotation: int):
-        self.position = position
-        self.rotation = rotation
-        
+        self.__position = position
+        self.__rotation = rotation
+        self.__world_position = Vector(0, 0)
+        self.__world_rotation = 0
+        self.children = []
 
     def set_parent(self, parent: Parent):
         self.parent = parent
-        parent.child = self
+        parent.children.append(self)
+    
+    @property
+    def position(self):
+        return self.__position.copy()
+    
+    @position.setter
+    def position(self, vector):
+        self.__position = vector
+        self.change_location()
+
+    @property
+    def rotation(self):
+        return self.__rotation
+    
+    @rotation.setter
+    def rotation(self, degree):
+        self.__rotation = degree
+        self.change_location()
         
-        
-    @getter
+    @property
     def world_position(self):
-        return self.parent.world_position + self.position
+        return self.__world_position
     
-    @getter
+    @property
     def world_rotation(self):
-        return self.parent.world_rotation + self.rotation
+        return self.__world_rotation
     
+    def change_location(self):
+        self.__world_position = self.parent.world_position + self.__position.rotate(self.parent.rotation)
+        self.__world_rotation = self.parent.world_rotation + self.__rotation
+        for child in self.children:
+            child.change_location()
+
+  
 class PhysicsLocation:
-    def __init__(self, physics):
+    def __init__(self, physics, vector: Vector, angle: int):
         self.physics = physics
         self.children = []
+        self.__position = vector
+        self.__rotation = angle
     
     def set_parent(self, parent: Parent):
         self.parent = parent
     
     @property
     def position(self):
-        return self.world_position - self.parent.world_position
+        return self.__position
     
     @position.setter
     def position(self, value: Vector):
-        self.physics.body.transform.position.x = (self.parent.position.x + value.x) / PPM
-        self.physics.body.transform.position.y = (self.parent.position.y + value.y) / PPM
+        self.__position = value
+        self.change_location()
     
     @property
     def rotation(self):
-        parent = self.parent.world_rotation
-        return self.physics.body.angle - parent
+        return self.__rotation
     
     @rotation.setter
-    def rotation(self, value: int):
-        self.physics.body.angle = self.parent.world_rotation + value
-    
-    @getter
+    def rotation(self, angle: int):
+        self.__rotation = angle
+        self.change_location()
+        
+    @property
     def world_position(self):
         return Vector(self.physics.body.transform.position.x, self.physics.body.transform.position.y) * PPM
     
-    @getter
+    @world_position.setter
+    def world_position(self, vector: Vector):
+        self.physics.body.transform.position.x = vector.x / PPM
+        self.physics.body.transform.position.y = vector.y / PPM
+    
+    @property
     def world_rotation(self):
         return self.physics.body.angle
+    
+    @world_rotation.setter
+    def world_rotation(self, rotation: int):
+        self.physics.body.angle = rotation
+    
+    def change_location(self):
+        self.world_position = self.parent.world_position + self.__position.rotate(self.parent.rotation)
+        self.world_rotation = self.parent.world_rotation + self.__rotation
+        for child in self.children:
+            child.change_location()

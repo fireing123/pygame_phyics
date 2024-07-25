@@ -14,9 +14,13 @@ class InputField(UI):
         super().__init__(name, layer, tag, visible, position, rotation, parent_name)
         self.image = ImageObject(self, surface=rect, type='topleft', follow=True, collide=True)
         self.image.og_image.fill((0, 0, 0, 128))
+        self.components.append(self.image)
+
         self.input_line = ImageObject(self, surface=(5, scale[1]), type="topleft", follow=True)
         self.input_line.og_image.fill((255,255,255, 255))
+        
         self.field = Text(name + '_text', layer, tag + "_text", visible, [0, 0], 0, name, scale[1], color, font, interval)
+        
         self.text = ""
         self.focused = False
         self.editing_pos = 0
@@ -149,8 +153,6 @@ class InputField(UI):
 
             if self.backspace:
                 self.backtime.run_periodic_task()
-
-        self.image.update()
         
         if not self.stay and Input.get_mouse_down(0):
             self.focused = False
@@ -185,10 +187,13 @@ class InputField(UI):
                 self.bar_reset()    
 
     def render(self, surface, camera):
-        self.image.render(surface, camera)
         if self.focused:
             self.input_line.render(surface, camera)
             
     def instantiate(self):
         super().instantiate()
         self.field.instantiate()
+    
+    def set_parent(self):
+        super().set_parent()
+        self.field.set_parent()
