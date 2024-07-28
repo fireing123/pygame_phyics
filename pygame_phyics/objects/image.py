@@ -19,7 +19,7 @@ class ImageObject(Component):
         self.type = 'center' if kwargs.get('type') == None else kwargs['type']
     
     def update(self):
-        self.rect = self.image.get_rect(**{self.type: self.object.location.world_position})
+        self.rect = self.image.get_rect(**{self.type: self.object.render_position})
         
         if self.collide:
             self.object.rect = self.rect

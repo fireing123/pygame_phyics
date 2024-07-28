@@ -1,5 +1,4 @@
 import pygame
-from pygame_phyics import util
 from pygame_phyics.manger import Manger
 from pygame_phyics.objects.gameobject import GameObject
 
@@ -68,10 +67,9 @@ class TileMap(GameObject):
     def render(self, surface, camera):
         HALF_WIDTH = Manger.WIDTH / (self.size * 2)
         HALF_HEIGHT = Manger.HEIGHT / (self.size * 2)
-        tile_camera = camera.location.world_position.div_float(self.size)
-        xrange = int(tile_camera.x - HALF_WIDTH), int(tile_camera.x + HALF_WIDTH) + 1
-        yrange = int(tile_camera.y - HALF_HEIGHT), int(tile_camera.y + HALF_HEIGHT) + 1
-        pygame.draw.circle(surface, (255, 255, 255), (500, 400), 5)
+        tile_camera = camera.location.world_position / self.size
+        xrange = int(tile_camera.x - HALF_WIDTH), int(tile_camera.x + HALF_WIDTH) + 2
+        yrange = int(tile_camera.y - HALF_HEIGHT), int(tile_camera.y + HALF_HEIGHT) + 2
         for y in range(*yrange):
             for x in range(*xrange):
                 tile_n = self.get_tile((x, y))

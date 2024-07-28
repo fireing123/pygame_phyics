@@ -169,6 +169,8 @@ class Game:
                 
                 events(cls, event)
 
+            Manger.scene.phyics_collison()
+
             Manger.scene.update()
 
             Manger.world.Step(

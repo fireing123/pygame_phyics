@@ -3,6 +3,12 @@ from pygame_phyics.camera import Camera
 
 class Component:
     """기본 함수만 선언해놓음"""
+    def on_collision_enter(self, collision):
+        pass
+    def on_collision_stay(self, collision):
+        pass
+    def on_collision_exit(self, collision):
+        pass
     def on_mouse_enter(self, pos: tuple[int, int]):
         """마우스가 오브젝트(rect) 안에 들어올떄 호출됨
 
@@ -34,5 +40,7 @@ class Component:
             surface (pygame.Surface): 프로그램 화면
             camera (Camera): 씬 카메라
         """
+        pass
+    def delete(self):
         pass
     

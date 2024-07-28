@@ -1,5 +1,4 @@
 from pygame.math import Vector2 as Vector
-from pygame_phyics.util import getter
 from pygame_phyics import PPM
 
 class Parent:
@@ -20,6 +19,7 @@ class Location(Parent):
         self.__rotation = rotation
         self.__world_position = Vector(0, 0)
         self.__world_rotation = 0
+        self.parent : Parent = None
         self.children = []
 
     def set_parent(self, parent: Parent):
@@ -60,31 +60,28 @@ class Location(Parent):
 
   
 class PhysicsLocation:
-    def __init__(self, physics, vector: Vector, angle: int):
+    def __init__(self, physics):
         self.physics = physics
-        self.children = []
-        self.__position = vector
-        self.__rotation = angle
     
     def set_parent(self, parent: Parent):
         self.parent = parent
     
     @property
     def position(self):
-        return self.__position
+        return self.world_position - self.parent.world_position
     
     @position.setter
     def position(self, value: Vector):
-        self.__position = value
+        self.world_position = self.parent.world_position + value
         self.change_location()
     
     @property
     def rotation(self):
-        return self.__rotation
+        return self.world_rotation - self.parent.world_rotation
     
     @rotation.setter
     def rotation(self, angle: int):
-        self.__rotation = angle
+        self.world_rotation = self.parent.world_rotation + angle
         self.change_location()
         
     @property
@@ -104,8 +101,14 @@ class PhysicsLocation:
     def world_rotation(self, rotation: int):
         self.physics.body.angle = rotation
     
+    def set_location(self, location: Location):
+        self.parent = location.parent
+        self.children = location.children
+        self.position = location.position
+        self.rotation = location.rotation
+
     def change_location(self):
-        self.world_position = self.parent.world_position + self.__position.rotate(self.parent.rotation)
-        self.world_rotation = self.parent.world_rotation + self.__rotation
+        self.world_position = self.parent.world_position + self.position.rotate(self.parent.rotation)
+        self.world_rotation = self.parent.world_rotation + self.rotation
         for child in self.children:
             child.change_location()

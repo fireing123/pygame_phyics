@@ -12,7 +12,7 @@ Game.init((500, 400), "TileMap")
 def tilemap():
     tilemapOB = Manger.scene.get_objects("tilemap")[0]
     def start(cls):
-        pass
+        cls.camera = Manger.scene.camera.location
 
     def event(cls, event):
         if event.type == pygame.KEYDOWN:
@@ -28,6 +28,24 @@ def tilemap():
             if event.key == pygame.K_f:
                 print("off")
                 Manger.scene.camera.status = 'idle'
+            if event.key == pygame.K_w:
+                cls.camera.rotation += 20
+            if event.key == pygame.K_UP:
+                c = cls.camera.position
+                c.y += 10
+                cls.camera.position = c
+            if event.key == pygame.K_DOWN:
+                c = cls.camera.position
+                c.y -= 10
+                cls.camera.position = c
+            if event.key == pygame.K_LEFT:
+                c = cls.camera.position
+                c.x -= 10
+                cls.camera.position = c
+            if event.key == pygame.K_RIGHT:
+                c = cls.camera.position
+                c.x += 10
+                cls.camera.position = c
 
     def update(cls):
         pass

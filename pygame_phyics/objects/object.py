@@ -17,7 +17,9 @@ class Object(Component):
     def delete(self): 
         """씬에서 이 오브젝트를 삭제합니다"""
         Manger.scene.remove(self)
+        for component in self.components:
+            component.delete()
         del self
 
-    def instantiate(self):
+    def init_instantiate(self):
         Manger.scene.add(self)

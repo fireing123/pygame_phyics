@@ -15,6 +15,14 @@ class Scene:
 
         self.layers = [[],[],[],[],[],[],[],[]]
 
+    def phyics_collison(self):
+        for phyics in Physics.phyics_arr:
+            phyics.collision()
+
+    def phyics_set_location(self):
+        for phyics in Physics.phyics_arr:
+            phyics.set_location()
+
     def update(self):
         """등록된 객체에 update 함수를 실행합니다
         """
@@ -38,9 +46,10 @@ class Scene:
         """
         for layer in self.layers:
             for obj in layer:
-                obj.render(surface, self.camera)
-                for component in obj.components:
-                    component.render(surface, self.camera)
+                if obj.visible:
+                    obj.render(surface, self.camera)
+                    for component in obj.components:
+                        component.render(surface, self.camera)
     
     def add(self, obj: GameObject):
         """
@@ -121,13 +130,14 @@ class Scene:
         """
         json : dict = _util.jsopen(path)
         setting : dict = json['setting']
-        #Manger.tile_sheet = {til[0] : TileSheet(*til) for til in setting['tile']}
-        #Manger.surface_sheet = {suf[0] : SurfaceSheet(*suf) for suf in setting['surface']} 직접 하는게 직관적
+        Manger.tile_sheet = {til[0] : TileSheet(*til) for til in setting.get('tile', [])}
+        Manger.surface_sheet = {suf[0] : SurfaceSheet(*suf) for suf in setting.get('surface', [])}
         for key, value in setting.items():
             setattr(Manger, key, value)
 
         parent_object = ParentObject() # 우주 느낌
-        parent_object.instantiate()
+        parent_object.init_instantiate()
+
         objs = json['objs']
         for name in objs.keys():
             for json_object in objs[name]:
@@ -141,14 +151,16 @@ class Scene:
                             raise ImportError(f"{name} 클레스가 존재하지 않거나 불러지지 않았습니다. \n 현재 불러온 클래스 {Manger.classes}")
                     if list(inspect.signature(prefab_class).parameters.keys()) == parameters:
                         prefab = prefab_class(*args)
-                        prefab.instantiate()
+                        prefab.init_instantiate()
                     elif len(list(inspect.signature(prefab_class).parameters.keys())) == len(parameters):
                         raise ValueError(f"리스트에 길이는 같으나 이름이 틀리거나 순서가 다른것같습니다.\njson :{parameters}\n{name} class:{list(inspect.signature(prefab_class).parameters.keys())}")
                 except ValueError as e:
                     print("Error message: ", e)
         
-
         self.set_parent()
-        parent_object.location.set_world()
+
+        parent_object.location.set_world() # 각 오브젝트 world_position 생성
+        
+        self.phyics_set_location()
 
         self.display = setting.get('display', 'main_cam')

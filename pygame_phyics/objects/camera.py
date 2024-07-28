@@ -9,7 +9,7 @@ from pygame_phyics.effect import Glitch
 class CameraObject(Object):
     def __init__(self, name, tag, position, rotation):
         super().__init__(name, 0, tag)
-        self.visible = False
+        self.visible = True
         self.status = "idle"
         self.rect = None
         self.collide = 'out'
@@ -29,7 +29,7 @@ class CameraObject(Object):
         Returns:
             tuple[float, float]: 카메라 시선이 적용된 위치
         """
-        zero_vector = Vector(Manger.WIDTH/2, Manger.HEIGHT/2) - Vector(*position)
+        zero_vector = Vector(*position)
         rotated = zero_vector.rotate(self.location.rotation)
         camerad = rotated - self.location.position
         return camerad.xy

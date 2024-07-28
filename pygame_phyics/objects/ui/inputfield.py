@@ -6,21 +6,24 @@ from pygame_phyics.objects.image import ImageObject
 from pygame_phyics.objects.ui import NEWLINE
 from pygame_phyics.objects.ui.text import Text
 from pygame_phyics.objects.ui.ui import UI
+from pygame_phyics.objects.ui.inputline import InputLine
 from pygame_phyics.timertask import OnceTimerTask, TimerTask
 
 
 class InputField(UI):
     def __init__(self, name, layer, tag, visible, position, rotation, parent_name, scale, color, font, interval, rect):
         super().__init__(name, layer, tag, visible, position, rotation, parent_name)
-        self.image = ImageObject(self, surface=rect, type='topleft', follow=True, collide=True)
-        self.image.og_image.fill((0, 0, 0, 128))
-        self.components.append(self.image)
 
-        self.input_line = ImageObject(self, surface=(5, scale[1]), type="topleft", follow=True)
-        self.input_line.og_image.fill((255,255,255, 255))
-        
-        self.field = Text(name + '_text', layer, tag + "_text", visible, [0, 0], 0, name, scale[1], color, font, interval)
-        
+        image = ImageObject(self, surface=rect, type='topleft', follow=True, collide=True)
+        image.og_image.fill((0, 0, 0, 128))
+        self.components.append(image)
+
+        self.input_line = InputLine(name + "_line", layer+1, tag, visible, (0, 0), 0, parent_name, scale[1])
+        self.input_line.init_instantiate()
+
+        self.field = Text(name + '_text', layer+1, tag + "_text", visible, [0, 0], 0, name, scale[1], color, font, interval)
+        self.field.init_instantiate()
+
         self.text = ""
         self.focused = False
         self.editing_pos = 0
@@ -164,12 +167,12 @@ class InputField(UI):
             self.timertask.run_periodic_task()
             
             if self.input_line.visible:
-                self.input_line.position = self.field.get_position(edit_text_pos)
+                self.input_line.location.position = self.field.get_position(edit_text_pos)
         
         self.input_line.update()
     
     def inputfield_event(self, event):
-        """입력 필드에 이벤트
+        """입력 필드에 이벤트 직접 받기
 
         Args:
             event (event): pygame 에 이벤트입니다_
@@ -184,16 +187,4 @@ class InputField(UI):
                 self.text_edit = False
                 self.text_editing = ""
                 self.focus_insert(event.text)
-                self.bar_reset()    
-
-    def render(self, surface, camera):
-        if self.focused:
-            self.input_line.render(surface, camera)
-            
-    def instantiate(self):
-        super().instantiate()
-        self.field.instantiate()
-    
-    def set_parent(self):
-        super().set_parent()
-        self.field.set_parent()
+                self.bar_reset()

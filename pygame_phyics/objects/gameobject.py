@@ -1,9 +1,6 @@
-from pygame import Surface
-from pygame_phyics.camera import Camera
 from pygame_phyics import util
 from pygame_phyics.location import Location
 from pygame_phyics.manger import Manger
-from pygame_phyics.objects.component import Component
 from pygame_phyics.objects.object import Object
 from pygame.math import Vector2 as Vector
 
@@ -25,10 +22,16 @@ class GameObject(Object):
         그릴떄 좌표를 이것으로 사용하시면 됩니다.
         하지만 좌표가 topleft 기준입니다"""
         render_pos = Vector(self.location.world_position.x, Manger.HEIGHT - self.location.world_position.y)
-        render_pos.x += Manger.WIDTH / 2
-        render_pos.y -= Manger.HEIGHT / 2
         return render_pos
     
+    def instantiate(self):
+        self.init_instantiate()
+        self.set_parent()
+        self.location.change_location()
+
     def set_parent(self):
         parent: GameObject = Manger.scene.get_objects(self.parent_name)[0]
         self.location.set_parent(parent.location)
+
+    def set_child(self, child):
+        self.location.children.append(child)
