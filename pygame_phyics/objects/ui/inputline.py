@@ -1,5 +1,5 @@
 from pygame_phyics.objects.ui.ui import UI
-from pygame_phyics.objects.image import ImageObject
+from pygame_phyics.objects.component.image import ImageObject
 
 class InputLine(UI):
     def __init__(self, name, layer, tag, visible, position, rotation, parent_name, y):

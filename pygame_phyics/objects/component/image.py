@@ -24,7 +24,6 @@ class ImageObject(Component):
         if self.collide:
             self.object.rect = self.rect
 
-
     def render(self, surface, camera):
         if self.visible:
             if self.camera_staticable:

@@ -30,6 +30,7 @@ from pygame_phyics.instantiate import import_module
 from pygame_phyics.input import Input
 from pygame_phyics.event import Event
 from pygame_phyics.objects import Physics
+from pygame_phyics.objects.component.soundSource import SoundSource
 import pygame_phyics.mouse as mouse
 
 

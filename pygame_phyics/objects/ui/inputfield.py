@@ -2,7 +2,7 @@ import pygame
 from pygame_phyics import game, util
 from pygame_phyics.event import Event
 from pygame_phyics.input import Input
-from pygame_phyics.objects.image import ImageObject
+from pygame_phyics.objects.component.image import ImageObject
 from pygame_phyics.objects.ui import NEWLINE
 from pygame_phyics.objects.ui.text import Text
 from pygame_phyics.objects.ui.ui import UI
