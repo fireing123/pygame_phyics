@@ -1,0 +1,44 @@
+{
+    "setting": {
+        "tile": [],
+        "surface": []
+    },
+    "objs": {
+        "CameraObject": [{
+            "name": "main_cam",
+            "tag": "camera",
+            "position": [0, 0],
+            "rotation": 0
+        }],
+        "StaticObject": [
+            {
+                "name": "ground",
+                "layer": 3,
+                "tag": "ground",
+                "visible": true,
+                "position": [600, 100],
+                "rotation": 0,
+                "parent_name": "parent",
+                "scale": [[0,0],[15.5,0],[15.5,-1],[0, -1]],
+                "shape": "polygon",
+                "collid_visible": true
+            }
+        ],
+        "DynamicObject": [
+            {
+                "name": "ground",
+                "layer": 3,
+                "tag": "ground",
+                "visible": true,
+                "position": [600, 500],
+                "rotation": 0,
+                "parent_name": "parent",
+                "scale": [[0,0],[15.5,0],[15.5,-1],[0, -1]],
+                "shape": "polygon",
+                "collid_visible": true,
+                "density": 0.5,
+                "friction": 1
+            }
+        ]
+    }
+}
