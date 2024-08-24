@@ -1,6 +1,5 @@
 from pygame_phyics.objects.component import Component
 
-
 class SoundListener(Component):
     """오직 한객체만 존재해야함"""
     listener = None

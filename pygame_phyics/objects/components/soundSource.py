@@ -1,6 +1,6 @@
 import pygame
 from pygame_phyics.objects.component import Component
-from pygame_phyics.objects.component.soundListener import SoundListener
+from pygame_phyics.objects.components.soundListener import SoundListener
 
 class SoundSource(Component):
     def __init__(self, object, path : str, volume, vol_lambda, mode=None):
