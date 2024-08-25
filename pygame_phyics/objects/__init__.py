@@ -1,6 +1,6 @@
 
 from pygame_phyics.objects.component import Component
-from pygame_phyics.objects.component.image import ImageObject
+from pygame_phyics.objects.components.image import ImageObject
 from pygame_phyics.objects.object import Object
 from pygame_phyics.objects.camera import CameraObject
 from pygame_phyics.objects.parent import ParentObject
