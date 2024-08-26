@@ -10,7 +10,7 @@ from pygame_phyics.sheet import SurfaceSheet
 from pygame.math import Vector2 as Vector
 from pygame_phyics.timertask import TimerTask, OnceTimerTask
 from pygame_phyics.input import Input
-from pygame_phyics.animation import Animation
+from pygame_phyics.objects.components.animation import Animation
 
 from pygame import (
     Surface,
