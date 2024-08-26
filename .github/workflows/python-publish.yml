@@ -11,9 +11,9 @@ name: Upload Python Package
 on:
   release:
     types: [published]
-
+environment: release
 permissions:
-  contents: read
+  id-token: write
 
 jobs:
   deploy:
