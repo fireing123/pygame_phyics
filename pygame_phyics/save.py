@@ -12,7 +12,7 @@ def save(export_path: str, **kwargs):
     Raises:
         ValueError: 저장할 겍체가 메게변수와 같은 변수가 없습니다
     """
-    kwargs['camera'] = list(Manger.scene.camera.vector.xy + (Manger.scene.camera.angle, ))
+    kwargs['camera'] = list(Manger.scene.camera.location.position + (Manger.scene.camera.location.rotation, ))
     saved_dict = {
         'setting':kwargs,
         'objs':{
